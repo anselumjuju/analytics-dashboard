@@ -7,7 +7,7 @@ const ACCESS_KEY = 'zoho_access_token';
 const REFRESH_KEY = 'zoho_refresh_token';
 const EXPIRY_KEY = 'zoho_token_expiry';
 
-export const getValidAccessToken = async () => {
+export const getValidAccessToken = async (): Promise<string | null> => {
 	const [accessToken, refreshToken, tokenExpiry] = await Promise.all([
 		redis.get(ACCESS_KEY),
 		redis.get(REFRESH_KEY),
@@ -15,8 +15,13 @@ export const getValidAccessToken = async () => {
 	]);
 
 	if (accessToken && tokenExpiry && Date.now() < parseInt(tokenExpiry as string)) {
-		return accessToken;
+		return accessToken.toString();
 	}
+	await refreshAccessToken(refreshToken as string);
+	const newAccessToken = await redis.get(ACCESS_KEY);
 
-	return refreshAccessToken(refreshToken as string);
+	if (newAccessToken) {
+		return newAccessToken.toString();
+	}
+	return null;
 }
