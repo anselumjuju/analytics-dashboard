@@ -9,10 +9,16 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "module-alias": "^2.2.3",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
+  },
+  "_moduleAliases": {
+    "@": "src"
   }
 }

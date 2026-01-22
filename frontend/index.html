@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Data Insight Uploader</title>
+    <title>DataFlow Upload</title>
+
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,6 +12,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet" />
   </head>
+
   <body>
     <div class="background-mesh"></div>
 
@@ -26,31 +28,23 @@
             stroke="white"
             stroke-width="2"
             stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-cloudy-icon lucide-cloudy">
+            stroke-linejoin="round">
             <path d="M17.5 12a1 1 0 1 1 0 9H9.006a7 7 0 1 1 6.702-9z" />
             <path d="M21.832 9A3 3 0 0 0 19 7h-2.207a5.5 5.5 0 0 0-10.72.61" />
           </svg>
         </div>
         <h1>DataFlow</h1>
-        <p>Securely process your CSV or JSON files instantly.</p>
+        <p>Upload your CSV or JSON to generate dashboards</p>
       </header>
 
       <div class="glass-panel">
+        <!-- UPLOAD VIEW -->
         <div id="upload-view">
           <div class="drop-zone" id="drop-zone">
             <input type="file" id="file-input" accept=".csv, .json" hidden />
 
             <div class="icon-circle">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
@@ -59,6 +53,7 @@
 
             <h3>Upload Data File</h3>
             <p class="hint">Drag & drop or click to browse</p>
+
             <div class="tags">
               <span class="tag">CSV</span>
               <span class="tag">JSON</span>
@@ -67,19 +62,23 @@
           </div>
         </div>
 
+        <!-- LOADER VIEW -->
         <div id="progress-view" class="hidden">
           <div class="progress-container">
             <div class="file-info">
-              <span id="uploading-filename">data.csv</span>
+              <span id="uploading-filename">Uploading...</span>
               <span id="upload-percent">0%</span>
             </div>
+
             <div class="progress-bar-bg">
               <div class="progress-bar-fill" id="progress-fill"></div>
             </div>
-            <p class="status-text">Uploading and generating report...</p>
+
+            <p class="status-text">Uploading & generating dashboards...</p>
           </div>
         </div>
 
+        <!-- ERROR VIEW -->
         <div id="error-view" class="hidden">
           <div class="error-box">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -87,19 +86,21 @@
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
-            <span id="error-text">Error message goes here.</span>
+            <span id="error-text">Error occurred</span>
           </div>
           <button class="btn-text" id="try-again-btn">Try Again</button>
         </div>
 
-        <div id="report-view" class="hidden">
+        <!-- IFRAME VIEW -->
+        <div id="iframe-view" class="hidden">
           <div class="report-header">
             <div class="success-badge">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              Analysis Complete
+              Dashboards Ready
             </div>
+
             <button class="btn-icon" id="reset-btn" title="Upload New File">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -108,10 +109,7 @@
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-upload-icon lucide-upload">
+                stroke-width="2">
                 <path d="M12 3v12" />
                 <path d="m17 8-5-5-5 5" />
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -119,17 +117,14 @@
             </button>
           </div>
 
-          <div class="metrics-grid" id="metrics-container"></div>
-
-          <div class="insights-box">
-            <h4>Key Insights</h4>
-            <ul id="insights-list"></ul>
+          <div class="iframe-section">
+            <h4>Generated Dashboards</h4>
+            <div id="iframe-container" class="iframe-grid"></div>
           </div>
-
-          <button class="btn-primary full-width">Download Full Report</button>
         </div>
       </div>
     </main>
-    <script src="script.js"></script>
+
+    <script type="module" src="script.js"></script>
   </body>
 </html>

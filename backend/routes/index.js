@@ -1,8 +1,9 @@
 import express from 'express';
-import {refreshAccessToken} from '../handles/auth/refreshAccessToken.js';
+import {upload} from '../middlewares/multer.js';
+import {analyzeData} from '../services/analyzeData.js';
 
 const router = express.Router();
 
-router.get('/refresh-access-token', refreshAccessToken);
+router.post('/get-analytics-data', upload.single('file'), analyzeData);
 
 export default router;

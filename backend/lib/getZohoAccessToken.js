@@ -1,9 +1,9 @@
+import {generateAccessToken} from '../services/generateAccessToken.js';
 import {getToken, isTokenExpired} from '../store/tokenStore.js';
-import refreshAccessTokenService from '../handles/auth/refreshAccessToken.js';
 
 export const getZohoAccessToken = async () => {
   if (!getToken() || isTokenExpired()) {
-    const newToken = await refreshAccessTokenService();
+    const newToken = await generateAccessToken();
     return newToken;
   }
 
