@@ -2,12 +2,13 @@
 // Retuns an array of privateEmbed URLs for the given viewIDs
 
 import {getZohoAccessToken} from '../lib/getZohoAccessToken.js';
+import {getWorkspaceId} from '../store/tokenStore.js';
 
 export const getPrivateEmbedURL = async (viewIDs) => {
   if (!viewIDs?.length) return [];
 
   const baseURL = process.env.ZOHO_AUTH_ANALYTICS_URL;
-  const workspaceId = process.env.ZOHO_ANALYTICS_WORKSPACE_ID;
+  const workspaceId = getWorkspaceId();
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
 
   const accessToken = await getZohoAccessToken();

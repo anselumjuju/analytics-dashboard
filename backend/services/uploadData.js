@@ -3,11 +3,12 @@
 // Returns the table schema
 
 import {getZohoAccessToken} from '../lib/getZohoAccessToken.js';
+import {getWorkspaceId} from '../store/tokenStore.js';
 
 export const uploadData = async (file, fileName) => {
   const baseURL = process.env.ZOHO_AUTH_ANALYTICS_URL;
   const accessToken = await getZohoAccessToken();
-  const workspaceId = process.env.ZOHO_ANALYTICS_WORKSPACE_ID;
+  const workspaceId = getWorkspaceId();
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
 
   const uniqueId = new Date().getTime();

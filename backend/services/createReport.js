@@ -6,16 +6,20 @@ import {getConfig} from './getConfig.js';
 import {getPrompt} from '../lib/getPrompt.js';
 import {mockConfigs} from '../lib/mockConfigs.js';
 import {getZohoAccessToken} from '../lib/getZohoAccessToken.js';
+import {getWorkspaceId} from '../store/tokenStore.js';
 
 export const createReport = async (uploadDataResponse) => {
   const {tableName, columnDetails} = uploadDataResponse;
 
   const baseURL = process.env.ZOHO_AUTH_ANALYTICS_URL;
   const accessToken = await getZohoAccessToken();
-  const workspaceId = process.env.ZOHO_ANALYTICS_WORKSPACE_ID;
+  const workspaceId = getWorkspaceId();
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
 
-  const configs = await getConfig(getPrompt(columnDetails, tableName));
+  const rawConfigs = await getConfig(getPrompt({tableSchema: columnDetails, tableName, scope: 'generate'}));
+  const validatedConfigs = await getConfig(getPrompt({tableSchema: columnDetails, tableName, scope: 'validate', configs: rawConfigs}));
+
+  const configs = validatedConfigs;
   // const configs = mockConfigs(tableName);
 
   const baseReportURL = `${baseURL}/restapi/v2/workspaces/${workspaceId}/reports`;

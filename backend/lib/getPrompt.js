@@ -1,4 +1,4 @@
-export const getPrompt = (tableSchema, tableName) => {
+export const getPrompt = ({tableSchema, tableName, configs, scope}) => {
   const configFields = {
     baseTableName: {type: 'String', required: true, description: 'Name of the base table used to create report'},
     title: {type: 'String', required: true, description: 'Name of the report'},
@@ -134,7 +134,7 @@ export const getPrompt = (tableSchema, tableName) => {
     mergeAxisInfo: {type: 'String', requiredIf: 'isAxisMerge == true', formatExample: {axisIndex: [2, 3], labelName: 'Merge_axis'}},
   };
 
-  const prompt = `
+  const generatePrompt = `
     You are a senior data analyst and business intelligence expert.
 
     Your task:
@@ -222,5 +222,72 @@ export const getPrompt = (tableSchema, tableName) => {
     }
   `;
 
-  return prompt;
+  const validatePrompt = `
+    You are a senior data analyst and business intelligence expert.
+
+    Your task:
+    Analyze the given table schema and validate the configs, if the config is not valid or contains any unecessary fields remove them. or update them with the correct values.
+    Go through each config and match it with the corresponding table schema. 
+    If config is invalid use some matching values from the allowed values. 
+    Also verify if that the table name in the config matches the table name in the table schema.
+
+    STRICT RULES:
+    - Think like a real analytics consultant.
+    - Each config MUST follow Zoho Analytics CONFIG_SCHEMA format.
+
+    OUTPUT FORMAT:
+    Return ONLY a JSON ARRAY of config objects — no explanation text. No other text.
+    Even without mentioning JSON or enclosing within backticks, return the JSON ARRAY.
+
+
+    ------------------------------------
+    CONFIG FIELD RULES:
+    ${JSON.stringify(configFields)}
+    - Strictly follow this format.
+    - Do not add any additional fields.
+
+    ------------------------------------
+    CONFIGS:
+    ${JSON.stringify(configs)}
+
+    
+    ------------------------------------
+    EXAMPLE OUTPUT STYLE (DO NOT COPY — JUST LEARN FORMAT):
+    {
+      "success": true,
+      "configs": 
+        [
+          {
+            "baseTableName": ${tableName},
+            "title": "Sales Trend by Order Date",
+            "description": "Tracks sales performance over time",
+            "reportType": "chart",
+            "chartType": "line",
+            "axisColumns": [
+              { "type": "xAxis", "columnName": "Order Date", "operation": "monthYear" },
+              { "type": "yAxis", "columnName": "Sales", "operation": "sum" }
+            ]
+          },
+          {
+            "baseTableName": ${tableName},
+            "title": "Profit by Category",
+            "description": "Compares profit across product categories",
+            "reportType": "chart",
+            "chartType": "bar",
+            "axisColumns": [
+              { "type": "xAxis", "columnName": "Category", "operation": "actual" },
+              { "type": "yAxis", "columnName": "Profit", "operation": "sum" }
+            ]
+          }
+        ]
+    }
+    
+
+    ------------------------------------
+    NOW VALIDATE:
+    - Remove if keys or values doesn't match the schema.
+    - Also keep the result in a json format like above without additional text
+  `;
+
+  return scope === 'generate' ? generatePrompt : validatePrompt;
 };
