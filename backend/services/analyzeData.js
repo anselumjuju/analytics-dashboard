@@ -1,4 +1,5 @@
 import {createReport} from './createReport.js';
+import {createWorkSpace} from './createWorkspace.js';
 import {getPrivateEmbedURL} from './getEmbedURL.js';
 import {uploadData} from './uploadData.js';
 
@@ -7,6 +8,10 @@ export const analyzeData = async (req, res) => {
   const fileName = req.file.originalname;
 
   if (!req.file) return res.status(400).json({error: 'No file received'});
+
+  // Create a new Workspace
+  const workspace = await createWorkSpace();
+  if (workspace?.status !== 'success') return res.status(500).json({error: 'Workspace creation failed', details: workspace});
 
   // Upload Data to Zoho Analytics and Gets Schema
   const uploadDataResponse = await uploadData(file, fileName);
