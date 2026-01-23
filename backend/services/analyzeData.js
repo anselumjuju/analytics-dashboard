@@ -1,39 +1,32 @@
-import {getZohoAccessToken} from '../lib/getZohoAccessToken.js';
 import {createReport} from './createReport.js';
-import {getEmbedURL} from './getEmbedURL.js';
+import {getPrivateEmbedURL} from './getEmbedURL.js';
 import {uploadData} from './uploadData.js';
 
 export const analyzeData = async (req, res) => {
   const file = req.file;
+  const fileName = req.file.originalname;
 
   if (!req.file) return res.status(400).json({error: 'No file received'});
 
-  const clientId = process.env.ZOHO_ANALYTICS_CLIENT_ID;
-  const clientSecret = process.env.ZOHO_ANALYTICS_CLIENT_SECRET;
-  const baseUrl = process.env.ZOHO_ACCOUNT_BASE_URL;
-  const accessToken = await getZohoAccessToken();
-
   // Upload Data to Zoho Analytics and Gets Schema
-  console.log('Uploading File...');
-  const uploadDataResponse = await uploadData(file);
-  console.log('Upload Data Response:', uploadDataResponse);
+  const uploadDataResponse = await uploadData(file, fileName);
+
+  if (uploadDataResponse.status !== 'success') return res.status(500).json({error: 'Data upload failed', details: uploadDataResponse});
 
   // Upload Schema to gemini and gets report viewIDs
-  console.log('Getting Report View IDs...');
-  const reportDataResponse = await createReport(uploadDataResponse);
-  console.log('Report Data Response:', reportDataResponse);
+  const reportDataResponse = await createReport(uploadDataResponse.data);
+  const viewIDs = reportDataResponse.filter((id) => id !== undefined);
 
-  // Use viewIDs to get embed URLs
-  console.log('Getting Embed URLs...');
-  const embedURLsResponse = await getEmbedURL(reportDataResponse);
-  console.log('Embed URLs Response:', embedURLsResponse);
+  console.log('\n\nviewIDs: ', viewIDs);
 
-  // Return Embed URLs
-  console.log('Returning Embed URLs...');
+  if (viewIDs.length === 0) return res.status(500).json({error: 'Report creation failed', details: reportDataResponse});
+
+  // // Use viewIDs to get embed URLs
+  const embedURLs = await getPrivateEmbedURL(viewIDs);
+  console.log('\n\nembedURLs: ', embedURLs);
 
   return res.json({
     success: true,
-    accessToken,
-    urls: embedURLsResponse,
+    urls: embedURLs,
   });
 };

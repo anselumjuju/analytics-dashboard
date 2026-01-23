@@ -4,33 +4,42 @@
 
 import {getZohoAccessToken} from '../lib/getZohoAccessToken.js';
 
-export const uploadData = async (file) => {
+export const uploadData = async (file, fileName) => {
   const baseURL = process.env.ZOHO_AUTH_ANALYTICS_URL;
   const accessToken = await getZohoAccessToken();
   const workspaceId = process.env.ZOHO_ANALYTICS_WORKSPACE_ID;
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
 
+  const uniqueId = new Date().getTime();
+  const tableName = `${fileName.replaceAll(/[^a-zA-Z0-9]/g, '_')}_${uniqueId}`;
+
   const params = new URLSearchParams({
-    config: JSON.stringify({
-      tableName: req.params.tableName + new Date().getTime().toString().slice(0, 8),
+    CONFIG: JSON.stringify({
+      tableName,
       fileType: 'csv',
-      autoIdentify: true,
+      autoIdentify: 'true',
     }),
   });
 
-  const url = `${baseURL}/restapi/v2/workspaces/${workspaceId}/data/${tableName}/data?${params.toString()}`;
+  const url = `${baseURL}/restapi/v2/workspaces/${workspaceId}/data?${params}`;
 
   try {
+    const formData = new FormData();
+
+    const blob = new Blob([file.buffer], {type: 'text/csv'});
+    formData.append('FILE', blob, fileName);
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         Authorization: `Zoho-oauthtoken ${accessToken}`,
-        'ZANALYTICS-ORG-ID': orgId,
+        'ZANALYTICS-ORGID': orgId,
       },
-      body: JSON.stringify(file),
+      body: formData,
     });
-    const data = await response.json();
-    return data;
+
+    const res = await response.json();
+    return {status: 'success', data: {tableName: tableName, ...res.data}};
   } catch (error) {
     console.error('Upload data error:', error);
     return null;
