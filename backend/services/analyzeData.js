@@ -17,13 +17,10 @@ export const analyzeData = async (req, res) => {
   const reportDataResponse = await createReport(uploadDataResponse.data);
   const viewIDs = reportDataResponse.filter((id) => id !== undefined);
 
-  console.log('\n\nviewIDs: ', viewIDs);
-
   if (viewIDs.length === 0) return res.status(500).json({error: 'Report creation failed', details: reportDataResponse});
 
   // // Use viewIDs to get embed URLs
   const embedURLs = await getPrivateEmbedURL(viewIDs);
-  console.log('\n\nembedURLs: ', embedURLs);
 
   return res.json({
     success: true,

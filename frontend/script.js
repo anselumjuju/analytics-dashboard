@@ -1,141 +1,159 @@
 import {uploadFileToServer} from './uploadService.js';
 
+const DOM = {
+  container: document.getElementById('app-container'),
+  dropZone: document.getElementById('drop-zone'),
+  fileInput: document.getElementById('file-input'),
+  views: {
+    upload: document.getElementById('view-upload'),
+    progress: document.getElementById('view-progress'),
+    error: document.getElementById('view-error'),
+    dashboard: document.getElementById('view-dashboard'),
+  },
+  progress: {
+    fill: document.getElementById('progress-fill'),
+    percent: document.getElementById('percent-display'),
+    filename: document.getElementById('filename-display'),
+  },
+  error: {
+    msg: document.getElementById('error-message'),
+    retry: document.getElementById('retry-btn'),
+  },
+  dashboard: {
+    container: document.getElementById('iframe-container'),
+    reset: document.getElementById('reset-btn'),
+  },
+};
+
+const CONSTANTS = {
+  MAX_MB: 20,
+  ALLOWED_TYPES: ['csv', 'json'],
+};
+
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-  const dropZone = document.getElementById('drop-zone');
-  const fileInput = document.getElementById('file-input');
+  setupEventListeners();
+});
 
-  const uploadView = document.getElementById('upload-view');
-  const progressView = document.getElementById('progress-view');
-  const errorView = document.getElementById('error-view');
-  const iframeView = document.getElementById('iframe-view');
+function setupEventListeners() {
+  // Drag & Drop
+  DOM.dropZone.addEventListener('click', () => DOM.fileInput.click());
 
-  const progressFill = document.getElementById('progress-fill');
-  const uploadPercent = document.getElementById('upload-percent');
-  const uploadingFilename = document.getElementById('uploading-filename');
-  const errorText = document.getElementById('error-text');
-  const tryAgainBtn = document.getElementById('try-again-btn');
-  const resetBtn = document.getElementById('reset-btn');
-  const iframeContainer = document.getElementById('iframe-container');
-
-  const MAX_SIZE_MB = 20;
-
-  dropZone.addEventListener('click', () => fileInput.click());
-
-  fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) handleFile(e.target.files[0]);
-  });
-
-  dropZone.addEventListener('dragover', (e) => {
+  DOM.dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
-    dropZone.classList.add('drag-over');
+    DOM.dropZone.classList.add('drag-over');
   });
 
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
+  DOM.dropZone.addEventListener('dragleave', () => {
+    DOM.dropZone.classList.remove('drag-over');
   });
 
-  dropZone.addEventListener('drop', (e) => {
+  DOM.dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
-    dropZone.classList.remove('drag-over');
+    DOM.dropZone.classList.remove('drag-over');
     if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
   });
 
-  tryAgainBtn.addEventListener('click', resetUI);
-  resetBtn.addEventListener('click', resetUI);
+  // File Input
+  DOM.fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  });
 
-  function handleFile(file) {
-    if (!validateFile(file)) return;
+  // Buttons
+  DOM.error.retry.addEventListener('click', resetUI);
+  DOM.dashboard.reset.addEventListener('click', resetUI);
+}
 
-    uploadView.classList.add('hidden');
-    progressView.classList.remove('hidden');
-    uploadingFilename.textContent = file.name;
+// --- Core Logic ---
 
-    simulateProgress(file);
-  }
+async function handleFile(file) {
+  if (!validateFile(file)) return;
 
-  function validateFile(file) {
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      showError(`File exceeds ${MAX_SIZE_MB}MB limit.`);
-      return false;
+  switchView('progress');
+  DOM.progress.filename.textContent = file.name;
+  const progressInterval = startFakeProgress();
+
+  try {
+    const data = await uploadFileToServer(file);
+
+    clearInterval(progressInterval);
+    updateProgressBar(100);
+
+    if (!data || !data.urls) {
+      throw new Error('Server response missing "urls"');
     }
 
-    const validTypes = ['.csv', '.json'];
-    const isValid = validTypes.some((ext) => file.name.toLowerCase().endsWith(ext));
+    renderDashboards(data.urls);
 
-    if (!isValid) {
-      showError('Only .csv and .json files allowed.');
-      return false;
+    setTimeout(() => switchView('dashboard'), 500);
+  } catch (err) {
+    // 5. Failure: Stop loader, show error
+    clearInterval(progressInterval);
+    console.error(err);
+    DOM.error.msg.textContent = err.message || 'Failed to connect to server.';
+    switchView('error');
+  }
+}
+
+function validateFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (file.size > CONSTANTS.MAX_MB * 1024 * 1024) {
+    alert(`File is too large. Max ${CONSTANTS.MAX_MB}MB.`);
+    return false;
+  }
+
+  if (!CONSTANTS.ALLOWED_TYPES.includes(ext)) {
+    alert('Invalid format. Please upload .CSV or .JSON');
+    return false;
+  }
+  return true;
+}
+
+// --- View Management ---
+
+function switchView(viewName) {
+  Object.values(DOM.views).forEach((el) => el.classList.add('hidden'));
+  if (viewName === 'dashboard') {
+    DOM.container.classList.add('wide-mode');
+  } else {
+    DOM.container.classList.remove('wide-mode');
+  }
+
+  DOM.views[viewName].classList.remove('hidden');
+}
+
+function resetUI() {
+  DOM.fileInput.value = '';
+  updateProgressBar(0);
+  DOM.dashboard.container.innerHTML = '';
+  switchView('upload');
+}
+
+function updateProgressBar(percent) {
+  const val = Math.min(percent, 100);
+  DOM.progress.fill.style.width = `${val}%`;
+  DOM.progress.percent.textContent = `${Math.round(val)}%`;
+}
+
+function renderDashboards(urls) {
+  DOM.dashboard.container.innerHTML = '';
+
+  urls.forEach((url) => {
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.className = 'dashboard-card';
+    iframe.loading = 'lazy';
+    DOM.dashboard.container.appendChild(iframe);
+  });
+}
+
+function startFakeProgress() {
+  let progress = 0;
+  return setInterval(() => {
+    if (progress < 90) {
+      progress += Math.random() * 5;
+      updateProgressBar(progress);
     }
-
-    return true;
-  }
-
-  function simulateProgress(file) {
-    let progress = 0;
-
-    const interval = setInterval(() => {
-      progress += Math.random() * 12;
-
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        finishProcessing(file);
-      }
-
-      updateProgress(progress);
-    }, 180);
-  }
-
-  function updateProgress(percent) {
-    const val = Math.floor(percent);
-    progressFill.style.width = `${val}%`;
-    uploadPercent.textContent = `${val}%`;
-  }
-
-  async function finishProcessing(file) {
-    try {
-      const result = await uploadFileToServer(file);
-
-      if (!result.urls || !Array.isArray(result.urls)) {
-        throw new Error('Invalid response format');
-      }
-
-      renderIframes(result.urls);
-
-      progressView.classList.add('hidden');
-      iframeView.classList.remove('hidden');
-    } catch (err) {
-      showError(err.message);
-    }
-  }
-
-  function renderIframes(urls) {
-    iframeContainer.innerHTML = '';
-
-    urls.forEach((url) => {
-      const iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.loading = 'lazy';
-      iframeContainer.appendChild(iframe);
-    });
-  }
-
-  function showError(msg) {
-    uploadView.classList.add('hidden');
-    progressView.classList.add('hidden');
-    iframeView.classList.add('hidden');
-
-    errorText.textContent = msg;
-    errorView.classList.remove('hidden');
-  }
-
-  function resetUI() {
-    fileInput.value = '';
-    progressFill.style.width = '0%';
-    uploadPercent.textContent = '0%';
-
-    errorView.classList.add('hidden');
-    iframeView.classList.add('hidden');
-    uploadView.classList.remove('hidden');
-  }
-});
+  }, 200);
+}

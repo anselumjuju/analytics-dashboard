@@ -145,6 +145,7 @@ export const createReport = async (uploadDataResponse) => {
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
 
   const configs = await getConfig(getPrompt(columnDetails, tableName));
+  // const configs = mockConfigs;
 
   const baseReportURL = `${baseURL}/restapi/v2/workspaces/${workspaceId}/reports`;
 
@@ -154,7 +155,6 @@ export const createReport = async (uploadDataResponse) => {
   });
 
   const reportRequests = urls.map(async (url) => {
-    console.log('\n\nurl: ', url);
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -177,8 +177,6 @@ export const createReport = async (uploadDataResponse) => {
   });
 
   const reports = await Promise.all(reportRequests);
-
-  console.log('\n\nreports: ', reports);
 
   const viewIds = reports.map((report) => report?.data?.viewId).filter(Boolean);
 
