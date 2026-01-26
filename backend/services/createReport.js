@@ -17,9 +17,9 @@ export const createReport = async (uploadDataResponse) => {
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
 
   const rawConfigs = await getConfig(getPrompt({tableSchema: columnDetails, tableName, scope: 'generate'}));
-  const validatedConfigs = await getConfig(getPrompt({tableSchema: columnDetails, tableName, scope: 'validate', configs: rawConfigs}));
+  // const validatedConfigs = await getConfig(getPrompt({tableSchema: columnDetails, tableName, scope: 'validate', configs: rawConfigs}));
 
-  const configs = validatedConfigs;
+  const configs = rawConfigs;
   // const configs = mockConfigs(tableName);
 
   const baseReportURL = `${baseURL}/restapi/v2/workspaces/${workspaceId}/reports`;
