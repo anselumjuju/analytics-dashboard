@@ -1,7 +1,7 @@
 // Take the Refresh Token from env and
 // generate a new access token
 
-import {setToken} from '../store/tokenStore.js';
+import {setToken} from '../../store/tokenStore.js';
 
 export const generateAccessToken = async () => {
   const clientId = process.env.ZOHO_ANALYTICS_CLIENT_ID;

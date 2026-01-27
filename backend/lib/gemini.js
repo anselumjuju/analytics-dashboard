@@ -4,8 +4,8 @@ export async function askGemini(prompt) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
   const geminiModel = genAI.getGenerativeModel({
-    // model: 'gemini-2.5-flash-lite',
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.5-flash',
+    // model: 'gemini-3-flash-preview',
   });
   const result = await geminiModel.generateContent(prompt);
   const text = result.response.text();

@@ -1,4 +1,4 @@
-import {generateAccessToken} from '../services/generateAccessToken.js';
+import {generateAccessToken} from '../services/auth/generateAccessToken.js';
 import {getToken, isTokenExpired} from '../store/tokenStore.js';
 
 export const getZohoAccessToken = async () => {

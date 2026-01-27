@@ -2,11 +2,11 @@
 // Uses those urls to create reports and filter their viewID
 // Returns an array of viewIDs for the created reports
 
-import {getConfig} from './getConfig.js';
-import {getPrompt} from '../lib/getPrompt.js';
-import {mockConfigs} from '../lib/mockConfigs.js';
+import {getConfig} from './gemini/getConfigs.js';
+import {mockConfigs} from '../lib/data.js';
 import {getZohoAccessToken} from '../lib/getZohoAccessToken.js';
 import {getWorkspaceId} from '../store/tokenStore.js';
+import {validateConfig} from './validateConfig.js';
 
 export const createReport = async (uploadDataResponse) => {
   const {tableName, columnDetails} = uploadDataResponse;
@@ -16,11 +16,13 @@ export const createReport = async (uploadDataResponse) => {
   const workspaceId = getWorkspaceId();
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
 
-  const rawConfigs = await getConfig(getPrompt({tableSchema: columnDetails, tableName, scope: 'generate'}));
-  // const validatedConfigs = await getConfig(getPrompt({tableSchema: columnDetails, tableName, scope: 'validate', configs: rawConfigs}));
+  const rawConfigs = await getConfig({tableSchema: columnDetails, tableName});
+  const validatedConfigs = validateConfig(tableName, columnDetails, rawConfigs);
 
-  const configs = rawConfigs;
+  const configs = validatedConfigs;
   // const configs = mockConfigs(tableName);
+
+  if (!configs?.length) return [];
 
   const baseReportURL = `${baseURL}/restapi/v2/workspaces/${workspaceId}/reports`;
 

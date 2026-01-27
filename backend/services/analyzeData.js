@@ -12,20 +12,24 @@ export const analyzeData = async (req, res) => {
   // Create a new Workspace
   const workspace = await createWorkSpace();
   if (workspace?.status !== 'success') return res.status(500).json({error: 'Workspace creation failed', details: workspace});
+  console.log('Workspace created: ', workspace);
 
   // Upload Data to Zoho Analytics and Gets Schema
   const uploadDataResponse = await uploadData(file, fileName);
-
   if (uploadDataResponse.status !== 'success') return res.status(500).json({error: 'Data upload failed', details: uploadDataResponse});
+  console.log('Data uploaded: ', uploadDataResponse);
 
   // Upload Schema to gemini and gets report viewIDs
   const reportDataResponse = await createReport(uploadDataResponse.data);
   const viewIDs = reportDataResponse.filter((id) => id !== undefined);
+  console.log('Report created: ', reportDataResponse);
 
   if (viewIDs.length === 0) return res.status(500).json({error: 'Report creation failed', details: reportDataResponse});
+  console.log('View IDs: ', viewIDs);
 
   // // Use viewIDs to get embed URLs
   const embedURLs = await getPrivateEmbedURL(viewIDs);
+  console.log('Embed URLs: ', embedURLs);
 
   return res.json({
     success: true,
