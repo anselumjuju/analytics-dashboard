@@ -137,141 +137,448 @@ export const mockConfigs = (tableName) => {
   return [
     {
       baseTableName: tableName,
-      title: 'Monthly Sales and Profit Trend',
-      description: 'Visualizes the revenue and profit growth over time to identify seasonal patterns and business performance.',
+      title: 'Overall Sales & Profit Trends by Month',
+      description: 'Analyzes the monthly performance of total sales and profit, highlighting growth, decline, and seasonal patterns for executive overview.',
       reportType: 'chart',
-      chartType: 'line',
+      chartType: 'combo',
       axisColumns: [
-        {type: 'xAxis', columnName: 'Order Date', operation: 'monthYear'},
-        {type: 'yAxis', columnName: 'Sales', operation: 'sum'},
-        {type: 'yAxis', columnName: 'Profit', operation: 'sum'},
+        {
+          type: 'xAxis',
+          columnName: 'Order Date',
+          operation: 'monthYear',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Sales',
+          operation: 'sum',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Profit',
+          operation: 'sum',
+        },
       ],
       userFilters: [
-        {tableName: tableName, columnName: 'Region', operation: 'actual'},
-        {tableName: tableName, columnName: 'Segment', operation: 'actual'},
+        {
+          tableName: tableName,
+          columnName: 'Segment',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
       ],
       isAxisMerge: 'false',
     },
     {
       baseTableName: tableName,
-      title: 'Geographic Profit Distribution',
-      description: 'A map-based view showing profitability across different states to identify high and low performing regions.',
+      title: 'Sales Performance by State',
+      description: 'Visualizes total sales contribution from each state, identifying key geographical markets and areas needing strategic attention or investment.',
       reportType: 'chart',
       chartType: 'map filled',
       axisColumns: [
-        {type: 'xAxis', columnName: 'State', operation: 'actual'},
-        {type: 'yAxis', columnName: 'Profit', operation: 'sum'},
+        {
+          type: 'xAxis',
+          columnName: 'State',
+          operation: 'actual',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Sales',
+          operation: 'sum',
+        },
+        {
+          type: 'toolTip',
+          columnName: 'Profit',
+          operation: 'sum',
+        },
+        {
+          type: 'toolTip',
+          columnName: 'Order ID',
+          operation: 'distinctCount',
+        },
       ],
       userFilters: [
-        {tableName: tableName, columnName: 'Category', operation: 'actual'},
-        {tableName: tableName, columnName: 'Order Date', operation: 'actual'},
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Region',
+          operation: 'actual',
+        },
       ],
       isAxisMerge: 'false',
     },
     {
       baseTableName: tableName,
-      title: 'Sales Contribution by Segment',
-      description: 'Breakdown of total sales by customer segment to understand market share.',
-      reportType: 'chart',
-      chartType: 'ring',
+      title: 'Profitability Breakdown by Product Category and Sub-Category',
+      description:
+        'Provides a detailed pivot view of profit, sales, and order volume across product categories and their sub-categories, identifying core profitable areas and potential loss leaders.',
+      reportType: 'pivot',
       axisColumns: [
-        {type: 'xAxis', columnName: 'Segment', operation: 'actual'},
-        {type: 'yAxis', columnName: 'Sales', operation: 'sum'},
+        {
+          type: 'row',
+          columnName: 'Category',
+          operation: 'actual',
+        },
+        {
+          type: 'row',
+          columnName: 'Sub-Category',
+          operation: 'actual',
+        },
+        {
+          type: 'data',
+          columnName: 'Profit',
+          operation: 'sum',
+        },
+        {
+          type: 'data',
+          columnName: 'Sales',
+          operation: 'sum',
+        },
+        {
+          type: 'data',
+          columnName: 'Order ID',
+          operation: 'distinctCount',
+        },
       ],
-      userFilters: [{tableName: tableName, columnName: 'Region', operation: 'actual'}],
-      isAxisMerge: 'false',
-    },
-    {
-      baseTableName: tableName,
-      title: 'Category and Sub-Category Sales Performance',
-      description: 'Hierarchical view of sales across product categories and their specific sub-categories.',
-      reportType: 'chart',
-      chartType: 'stacked bar',
-      axisColumns: [
-        {type: 'xAxis', columnName: 'Category', operation: 'actual'},
-        {type: 'yAxis', columnName: 'Sales', operation: 'sum'},
-        {type: 'colorAxis', columnName: 'Sub-Category', operation: 'actual'},
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Region',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Segment',
+          operation: 'actual',
+        },
       ],
-      userFilters: [{tableName: tableName, columnName: 'Order Date', operation: 'actual'}],
-      isAxisMerge: 'false',
-    },
-    {
-      baseTableName: tableName,
-      title: 'Discount vs Profitability Analysis',
-      description: 'Analyzes the correlation between discount rates and resulting profit to evaluate pricing strategies.',
-      reportType: 'chart',
-      chartType: 'scatter',
-      axisColumns: [
-        {type: 'xAxis', columnName: 'Discount', operation: 'measure'},
-        {type: 'yAxis', columnName: 'Profit', operation: 'sum'},
-        {type: 'colorAxis', columnName: 'Category', operation: 'actual'},
-      ],
-      userFilters: [{tableName: tableName, columnName: 'Region', operation: 'actual'}],
       isAxisMerge: 'false',
     },
     {
       baseTableName: tableName,
       title: 'Top 10 Most Profitable Products',
-      description: 'Identifies the leading products contributing to the bottom line.',
+      description: 'Identifies the top 10 products contributing highest to the overall profit margin, guiding inventory, marketing, and sales strategies.',
       reportType: 'chart',
       chartType: 'horizontal bar',
       axisColumns: [
-        {type: 'xAxis', columnName: 'Product Name', operation: 'actual'},
-        {type: 'yAxis', columnName: 'Profit', operation: 'sum'},
+        {
+          type: 'xAxis',
+          columnName: 'Product Name',
+          operation: 'actual',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Profit',
+          operation: 'sum',
+        },
       ],
-      filters: [{tableName: tableName, columnName: 'Profit', operation: 'sum', filterType: 'ranking', values: ['Top 10'], exclude: 'false'}],
+      filters: [
+        {
+          tableName: tableName,
+          columnName: 'Profit',
+          operation: 'sum',
+          filterType: 'ranking',
+          values: ['Top 10'],
+          exclude: 'false',
+        },
+      ],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Segment',
+          operation: 'actual',
+        },
+      ],
       isAxisMerge: 'false',
     },
     {
       baseTableName: tableName,
-      title: 'Shipping Mode and Region Efficiency',
-      description: 'Pivot table analyzing order volume across different shipping modes and regions.',
-      reportType: 'pivot',
+      title: 'Customer Segment Sales Contribution Over Time',
+      description:
+        'Illustrates the historical sales performance of different customer segments, showing their changing contribution to total revenue and identifying growth or decline trends.',
+      reportType: 'chart',
+      chartType: 'stacked area',
       axisColumns: [
-        {type: 'row', columnName: 'Region', operation: 'actual'},
-        {type: 'column', columnName: 'Ship Mode', operation: 'actual'},
-        {type: 'data', columnName: 'Order ID', operation: 'distinctCount'},
+        {
+          type: 'xAxis',
+          columnName: 'Order Date',
+          operation: 'monthYear',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Sales',
+          operation: 'sum',
+        },
+        {
+          type: 'colorAxis',
+          columnName: 'Segment',
+          operation: 'actual',
+        },
       ],
-      userFilters: [{tableName: tableName, columnName: 'Category', operation: 'actual'}],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Region',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
+      ],
       isAxisMerge: 'false',
     },
     {
       baseTableName: tableName,
-      title: 'Annual Sales Growth by Sub-Category',
-      description: 'Compares yearly sales performance across different product sub-groups.',
-      reportType: 'pivot',
+      title: 'Impact of Discount on Profit by Category',
+      description:
+        'Examines the correlation between average discount percentages and total profit, segmented by product category, to identify effective and detrimental discounting strategies and their financial risks.',
+      reportType: 'chart',
+      chartType: 'scatter',
       axisColumns: [
-        {type: 'row', columnName: 'Sub-Category', operation: 'actual'},
-        {type: 'column', columnName: 'Order Date', operation: 'year'},
-        {type: 'data', columnName: 'Sales', operation: 'sum'},
+        {
+          type: 'xAxis',
+          columnName: 'Discount',
+          operation: 'average',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Profit',
+          operation: 'sum',
+        },
+        {
+          type: 'colorAxis',
+          columnName: 'Category',
+          operation: 'actual',
+        },
+        {
+          type: 'toolTip',
+          columnName: 'Product Name',
+          operation: 'distinctCount',
+        },
+      ],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Region',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Segment',
+          operation: 'actual',
+        },
       ],
       isAxisMerge: 'false',
     },
     {
       baseTableName: tableName,
-      title: 'Product Category Performance Summary',
-      description: 'Summary report of key metrics including total sales, profit, and average discount per category.',
+      title: 'Products with Negative Profit Contribution',
+      description:
+        'Lists specific products that have consistently generated negative profit, indicating areas of financial leakage and requiring immediate review for pricing or cost adjustments.',
       reportType: 'summary',
       axisColumns: [
-        {type: 'groupBy', columnName: 'Category', operation: 'actual'},
-        {type: 'summarize', columnName: 'Sales', operation: 'sum'},
-        {type: 'summarize', columnName: 'Profit', operation: 'sum'},
-        {type: 'summarize', columnName: 'Discount', operation: 'average'},
+        {
+          type: 'groupBy',
+          columnName: 'Product Name',
+          operation: 'actual',
+        },
+        {
+          type: 'summarize',
+          columnName: 'Profit',
+          operation: 'sum',
+        },
+        {
+          type: 'summarize',
+          columnName: 'Sales',
+          operation: 'sum',
+        },
+        {
+          type: 'summarize',
+          columnName: 'Quantity',
+          operation: 'sum',
+        },
+      ],
+      filters: [
+        {
+          tableName: tableName,
+          columnName: 'Profit',
+          operation: 'sum',
+          filterType: 'range',
+          values: ['-Infinity to -0.01'],
+          exclude: 'false',
+        },
+      ],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Region',
+          operation: 'actual',
+        },
       ],
       isAxisMerge: 'false',
     },
     {
       baseTableName: tableName,
-      title: 'Customer Loyalty and Order Frequency',
-      description: 'Identifies top customers based on total sales and volume of orders.',
+      title: 'Average Profit per Order by Ship Mode',
+      description:
+        'Compares the average profit generated per order across different shipping modes to assess their financial efficiency and identify potential operational improvements.',
+      reportType: 'chart',
+      chartType: 'bar',
+      axisColumns: [
+        {
+          type: 'xAxis',
+          columnName: 'Ship Mode',
+          operation: 'actual',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Profit',
+          operation: 'average',
+        },
+      ],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Segment',
+          operation: 'actual',
+        },
+      ],
+      isAxisMerge: 'false',
+    },
+    {
+      baseTableName: tableName,
+      title: 'Monthly Order Volume by Year (Seasonality Analysis)',
+      description:
+        'Analyzes the number of unique orders placed each month across different years, revealing crucial seasonality patterns and year-over-year growth in order volume for operational planning.',
+      reportType: 'pivot',
+      axisColumns: [
+        {
+          type: 'row',
+          columnName: 'Order Date',
+          operation: 'month',
+        },
+        {
+          type: 'column',
+          columnName: 'Order Date',
+          operation: 'year',
+        },
+        {
+          type: 'data',
+          columnName: 'Order ID',
+          operation: 'distinctCount',
+        },
+      ],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Region',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Segment',
+          operation: 'actual',
+        },
+      ],
+      isAxisMerge: 'false',
+    },
+    {
+      baseTableName: tableName,
+      title: 'Sales, Quantity, and Discount Relationship by Sub-Category',
+      description:
+        'Explores the interplay between average discount, total quantity sold, and total sales for each sub-category, providing insights into pricing strategy effectiveness and product demand.',
       reportType: 'chart',
       chartType: 'bubble',
       axisColumns: [
-        {type: 'xAxis', columnName: 'Customer Name', operation: 'actual'},
-        {type: 'yAxis', columnName: 'Sales', operation: 'sum'},
-        {type: 'colorAxis', columnName: 'Quantity', operation: 'sum'},
+        {
+          type: 'xAxis',
+          columnName: 'Discount',
+          operation: 'average',
+        },
+        {
+          type: 'yAxis',
+          columnName: 'Quantity',
+          operation: 'sum',
+        },
+        {
+          type: 'colorAxis',
+          columnName: 'Sub-Category',
+          operation: 'actual',
+        },
+        {
+          type: 'textAxis',
+          columnName: 'Sales',
+          operation: 'sum',
+        },
       ],
-      filters: [{tableName: tableName, columnName: 'Sales', operation: 'sum', filterType: 'ranking', values: ['Top 20'], exclude: 'false'}],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
+        {
+          tableName: tableName,
+          columnName: 'Region',
+          operation: 'actual',
+        },
+      ],
+      isAxisMerge: 'false',
+    },
+    {
+      baseTableName: tableName,
+      title: 'Sales Contribution by Region and Customer Segment',
+      description:
+        'Analyzes total sales contribution broken down by geographical region and customer segment, identifying key markets and growth opportunities for each customer group.',
+      reportType: 'pivot',
+      axisColumns: [
+        {
+          type: 'row',
+          columnName: 'Region',
+          operation: 'actual',
+        },
+        {
+          type: 'column',
+          columnName: 'Segment',
+          operation: 'actual',
+        },
+        {
+          type: 'data',
+          columnName: 'Sales',
+          operation: 'sum',
+        },
+      ],
+      userFilters: [
+        {
+          tableName: tableName,
+          columnName: 'Category',
+          operation: 'actual',
+        },
+      ],
       isAxisMerge: 'false',
     },
   ];

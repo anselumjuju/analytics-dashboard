@@ -19,6 +19,7 @@ export const uploadData = async (file, fileName) => {
       tableName,
       fileType: 'csv',
       autoIdentify: 'true',
+      onError: 'skiprow',
     }),
   });
 
@@ -40,7 +41,7 @@ export const uploadData = async (file, fileName) => {
     });
 
     const res = await response.json();
-    return {status: 'success', data: {tableName: tableName, ...res.data}};
+    return {tableName, ...res};
   } catch (error) {
     console.error('Upload data error:', error);
     return null;

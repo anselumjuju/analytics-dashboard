@@ -9,28 +9,37 @@ import {getWorkspaceId} from '../store/tokenStore.js';
 import {validateConfig} from './validateConfig.js';
 
 export const createReport = async (uploadDataResponse) => {
-  const {tableName, columnDetails} = uploadDataResponse;
+  const {tableName, data} = uploadDataResponse;
+  const {columnDetails} = data;
+
+  const isTesting = true;
 
   const baseURL = process.env.ZOHO_AUTH_ANALYTICS_URL;
   const accessToken = await getZohoAccessToken();
   const workspaceId = getWorkspaceId();
   const orgId = process.env.ZOHO_ANALYTICS_ORG_ID;
+  let configs = null;
 
-  const rawConfigs = await getConfig({tableSchema: columnDetails, tableName});
-  const validatedConfigs = validateConfig(tableName, columnDetails, rawConfigs);
+  if (!isTesting) {
+    console.log('Gemini request for analysis...');
+    const rawConfigs = await getConfig({tableSchema: columnDetails, tableName});
+    console.log('rawConfigs', rawConfigs);
+    const validatedConfigs = validateConfig(tableName, columnDetails, rawConfigs);
+    console.log('validatedConfigs', validatedConfigs);
 
-  const configs = validatedConfigs;
-  // const configs = mockConfigs(tableName);
+    configs = validatedConfigs;
+  } else {
+    console.log('Mock configs...');
+    configs = mockConfigs(tableName);
+  }
 
   if (!configs?.length) return [];
 
   const baseReportURL = `${baseURL}/restapi/v2/workspaces/${workspaceId}/reports`;
 
-  const urls = configs.map((config) => {
-    config.baseTableName = tableName;
-    return `${baseReportURL}?CONFIG=${encodeURIComponent(JSON.stringify(config))}`;
-  });
+  const urls = configs.map((config) => `${baseReportURL}?CONFIG=${encodeURIComponent(JSON.stringify(config))}`);
 
+  console.log('Creating reports...');
   const reportRequests = urls.map(async (url) => {
     try {
       const response = await fetch(url, {

@@ -1,0 +1,308 @@
+{
+  "tableName": "Superstore_csv_1769512412869",
+  "columnDetails": {
+    "Row ID": "Positive Number",
+    "Order ID": "Plain Text",
+    "Order Date": "Date",
+    "Ship Date": "Date",
+    "Ship Mode": "Plain Text",
+    "Customer ID": "Plain Text",
+    "Customer Name": "Plain Text",
+    "Segment": "Plain Text",
+    "Country": "Geo column",
+    "City": "Plain Text",
+    "State": "Geo column",
+    "Postal Code": "Positive Number",
+    "Region": "Plain Text",
+    "Product ID": "Plain Text",
+    "Category": "Plain Text",
+    "Sub-Category": "Plain Text",
+    "Product Name": "Plain Text",
+    "Sales": "Decimal Number",
+    "Quantity": "Positive Number",
+    "Discount": "Decimal Number",
+    "Profit": "Decimal Number"
+  },
+  "rawConfigs": [
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Monthly Sales and Profit Trend",
+      "description": "Visualizes the revenue and profit growth over time to identify seasonal patterns and business performance.",
+      "reportType": "chart",
+      "chartType": "line",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Order Date", "operation": "monthYear"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"}
+      ],
+      "userFilters": [
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Region", "operation": "actual"},
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Segment", "operation": "actual"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Geographic Profit Distribution",
+      "description": "A map-based view showing profitability across different states to identify high and low performing regions.",
+      "reportType": "chart",
+      "chartType": "map filled",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "State", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"}
+      ],
+      "userFilters": [
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Category", "operation": "actual"},
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Order Date", "operation": "actual"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Sales Contribution by Segment",
+      "description": "Breakdown of total sales by customer segment to understand market share.",
+      "reportType": "chart",
+      "chartType": "ring",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Segment", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Region", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Category and Sub-Category Sales Performance",
+      "description": "Hierarchical view of sales across product categories and their specific sub-categories.",
+      "reportType": "chart",
+      "chartType": "stacked bar",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Category", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"},
+        {"type": "colorAxis", "columnName": "Sub-Category", "operation": "actual"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Order Date", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Discount vs Profitability Analysis",
+      "description": "Analyzes the correlation between discount rates and resulting profit to evaluate pricing strategies.",
+      "reportType": "chart",
+      "chartType": "scatter",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Discount", "operation": "measure"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"},
+        {"type": "colorAxis", "columnName": "Category", "operation": "actual"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Region", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Top 10 Most Profitable Products",
+      "description": "Identifies the leading products contributing to the bottom line.",
+      "reportType": "chart",
+      "chartType": "horizontal bar",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Product Name", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"}
+      ],
+      "filters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Profit", "operation": "sum", "filterType": "ranking", "values": ["Top 10"], "exclude": "false"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Shipping Mode and Region Efficiency",
+      "description": "Pivot table analyzing order volume across different shipping modes and regions.",
+      "reportType": "pivot",
+      "axisColumns": [
+        {"type": "row", "columnName": "Region", "operation": "actual"},
+        {"type": "column", "columnName": "Ship Mode", "operation": "actual"},
+        {"type": "data", "columnName": "Order ID", "operation": "distinctCount"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Category", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Annual Sales Growth by Sub-Category",
+      "description": "Compares yearly sales performance across different product sub-groups.",
+      "reportType": "pivot",
+      "axisColumns": [
+        {"type": "row", "columnName": "Sub-Category", "operation": "actual"},
+        {"type": "column", "columnName": "Order Date", "operation": "year"},
+        {"type": "data", "columnName": "Sales", "operation": "sum"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Product Category Performance Summary",
+      "description": "Summary report of key metrics including total sales, profit, and average discount per category.",
+      "reportType": "summary",
+      "axisColumns": [
+        {"type": "groupBy", "columnName": "Category", "operation": "actual"},
+        {"type": "summarize", "columnName": "Sales", "operation": "sum"},
+        {"type": "summarize", "columnName": "Profit", "operation": "sum"},
+        {"type": "summarize", "columnName": "Discount", "operation": "average"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Customer Loyalty and Order Frequency",
+      "description": "Identifies top customers based on total sales and volume of orders.",
+      "reportType": "chart",
+      "chartType": "bubble",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Customer Name", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"},
+        {"type": "colorAxis", "columnName": "Quantity", "operation": "sum"}
+      ],
+      "filters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Sales", "operation": "sum", "filterType": "ranking", "values": ["Top 20"], "exclude": "false"}],
+      "isAxisMerge": "false"
+    }
+  ],
+  "validatedConfigs": [
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Monthly Sales and Profit Trend",
+      "description": "Visualizes the revenue and profit growth over time to identify seasonal patterns and business performance.",
+      "reportType": "chart",
+      "chartType": "line",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Order Date", "operation": "monthYear"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"}
+      ],
+      "userFilters": [
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Region", "operation": "actual"},
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Segment", "operation": "actual"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Geographic Profit Distribution",
+      "description": "A map-based view showing profitability across different states to identify high and low performing regions.",
+      "reportType": "chart",
+      "chartType": "map filled",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "State", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"}
+      ],
+      "userFilters": [
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Category", "operation": "actual"},
+        {"tableName": "Superstore_csv_1769512412869", "columnName": "Order Date", "operation": "actual"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Sales Contribution by Segment",
+      "description": "Breakdown of total sales by customer segment to understand market share.",
+      "reportType": "chart",
+      "chartType": "ring",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Segment", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Region", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Category and Sub-Category Sales Performance",
+      "description": "Hierarchical view of sales across product categories and their specific sub-categories.",
+      "reportType": "chart",
+      "chartType": "stacked bar",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Category", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"},
+        {"type": "colorAxis", "columnName": "Sub-Category", "operation": "actual"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Order Date", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Discount vs Profitability Analysis",
+      "description": "Analyzes the correlation between discount rates and resulting profit to evaluate pricing strategies.",
+      "reportType": "chart",
+      "chartType": "scatter",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Discount", "operation": "measure"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"},
+        {"type": "colorAxis", "columnName": "Category", "operation": "actual"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Region", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Top 10 Most Profitable Products",
+      "description": "Identifies the leading products contributing to the bottom line.",
+      "reportType": "chart",
+      "chartType": "horizontal bar",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Product Name", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Profit", "operation": "sum"}
+      ],
+      "filters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Profit", "operation": "sum", "filterType": "ranking", "values": ["Top 10"], "exclude": "false"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Shipping Mode and Region Efficiency",
+      "description": "Pivot table analyzing order volume across different shipping modes and regions.",
+      "reportType": "pivot",
+      "axisColumns": [
+        {"type": "row", "columnName": "Region", "operation": "actual"},
+        {"type": "column", "columnName": "Ship Mode", "operation": "actual"},
+        {"type": "data", "columnName": "Order ID", "operation": "distinctCount"}
+      ],
+      "userFilters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Category", "operation": "actual"}],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Annual Sales Growth by Sub-Category",
+      "description": "Compares yearly sales performance across different product sub-groups.",
+      "reportType": "pivot",
+      "axisColumns": [
+        {"type": "row", "columnName": "Sub-Category", "operation": "actual"},
+        {"type": "column", "columnName": "Order Date", "operation": "year"},
+        {"type": "data", "columnName": "Sales", "operation": "sum"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Product Category Performance Summary",
+      "description": "Summary report of key metrics including total sales, profit, and average discount per category.",
+      "reportType": "summary",
+      "axisColumns": [
+        {"type": "groupBy", "columnName": "Category", "operation": "actual"},
+        {"type": "summarize", "columnName": "Sales", "operation": "sum"},
+        {"type": "summarize", "columnName": "Profit", "operation": "sum"},
+        {"type": "summarize", "columnName": "Discount", "operation": "average"}
+      ],
+      "isAxisMerge": "false"
+    },
+    {
+      "baseTableName": "Superstore_csv_1769512412869",
+      "title": "Customer Loyalty and Order Frequency",
+      "description": "Identifies top customers based on total sales and volume of orders.",
+      "reportType": "chart",
+      "chartType": "bubble",
+      "axisColumns": [
+        {"type": "xAxis", "columnName": "Customer Name", "operation": "actual"},
+        {"type": "yAxis", "columnName": "Sales", "operation": "sum"},
+        {"type": "colorAxis", "columnName": "Quantity", "operation": "sum"}
+      ],
+      "filters": [{"tableName": "Superstore_csv_1769512412869", "columnName": "Sales", "operation": "sum", "filterType": "ranking", "values": ["Top 20"], "exclude": "false"}],
+      "isAxisMerge": "false"
+    }
+  ]
+}

@@ -3,50 +3,134 @@ import {createReportSchema} from '../../lib/data.js';
 
 export const getConfig = async ({tableSchema, tableName}) => {
   const prompt = `
-    You are a senior data analyst and business intelligence expert.
+    You are a Senior Data Analyst, Business Intelligence Architect, and Insight Strategist at an enterprise analytics consulting firm.
 
-    Your task:
-    Analyze the given table schema and generate AT LEAST 7 UNIQUE Zoho Analytics report config objects.
+    Your role is to analyze datasets like a real analytics professional, extract meaningful business insights, and generate structured Zoho Analytics report configurations that help executives understand performance, risks, opportunities, and decision drivers.
 
-    STRICT RULES:
-    - Think like a real analytics consultant.
-    - DO NOT repeat similar report ideas.
-    - Every report must serve a DIFFERENT analytical purpose.
-    - Base insights ONLY on available columns.
-    - Use numeric fields for measures and text/date fields for grouping.
-    - Make reports business-meaningful (sales, profit, customers, geography, performance, trends, efficiency, etc.).
-    - If a Date column exists, include time-based trend reports.
-    - If Geography exists, include region/state/city performance.
-    - If Sales/Profit exist, include profitability & growth analysis.
-    - Each config MUST follow Zoho Analytics CONFIG_SCHEMA format.
+    You are NOT generating random charts.
+    You are NOT guessing insights.
+    You MUST think critically, analytically, and prioritize business value.
 
-    OUTPUT FORMAT:
-    Return ONLY a JSON ARRAY of config objects — no explanation text. No other text.
-    Even without mentioning JSON or enclosing within backticks, return the JSON ARRAY.
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    CORE ANALYTICS PRINCIPLES (MANDATORY)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    - Think like a real analytics consultant advising leadership.
+    - Each report MUST answer a DIFFERENT business question.
+    - Base ALL insights strictly on available columns only.
+    - Numeric fields → measures only.
+    - Text/date fields → grouping, segmentation, filtering only.
+    - If Date exists → include trend and time performance analysis.
+    - If Geography exists → include regional/market performance analysis.
+    - If Sales/Revenue/Profit exist → include profitability and growth insights.
+    - Reports must focus on real business impact: performance, efficiency, risk, growth, contribution.
 
-    ------------------------------------
-    TABLE SCHEMA:
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    STRICT OUTPUT RULES (ZERO TOLERANCE)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    - OUTPUT ONLY a JSON ARRAY of config objects.
+    - DO NOT include explanations, markdown, or extra text.
+    - DO NOT invent, rename, or modify column names.
+    - DO NOT repeat analytical intent across configs.
+    - DO NOT violate schema field rules.
+    - If unsure → OMIT the report instead of guessing.
+    - Every config MUST strictly follow Zoho CONFIG_SCHEMA.
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    TABLE SCHEMA (AVAILABLE COLUMNS)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ${JSON.stringify(tableSchema)}
 
-    ------------------------------------
-    CONFIG FIELD RULES:
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    CONFIG FIELD RULES (STRICT CONTRACT)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ${JSON.stringify(createReportSchema)}
-    - Strictly follow this format.
-    - Do not add any additional fields.
-    - Do not change the allowed values of any fields.
-    - Do not change the format of any fields.
-    - Do not remove any required fields.
-    - Make sure to add userFilters and Filters atmost.
-    - Use userFilters whenever possible
+    Rules:
+    - Treat schema as a STRICT CONTRACT.
+    - Do NOT add or remove fields.
+    - Use 'userFilters' and 'filters' to filter data.
+    - Use 'userFilters' whereever possible with proper columns for custom filters.
+    - Only use allowed schema values.
 
-    ------------------------------------
-    TABLE NAME:
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    TABLE NAME (IMMUTABLE)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ${tableName}
-    - Use this as the baseTableName for each config object.
-    - Don't change or modify this.
+    - Use this EXACT value as 'baseTableName' in every config.
+    - NEVER modify it.
 
-    ------------------------------------
-    EXAMPLE OUTPUT STYLE (DO NOT COPY — JUST LEARN FORMAT):
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🎯 OBJECTIVE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Generate executive-grade Zoho Analytics report configs that:
+    - Reflect real-world business priorities
+    - Reveal performance, growth, profitability, risk, and opportunity
+    - Avoid vanity metrics or redundant breakdowns
+    - Form a structured analytics narrative (not random dashboards)
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🧠 ANALYTICS THINKING FLOW (INTERNAL)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    1. Infer dataset domain (Sales, Marketing, Finance, HR, Ops, etc.) — DO NOT OUTPUT.
+    2. Classify columns into:
+      - Dimensions, Measures, Time, IDs, Insight Drivers
+    3. Think like stakeholders:
+      - CEO, Finance Lead, Ops Manager, Growth Analyst
+    4. Ask:
+      - What drives growth or decline?
+      - What reveals risk or inefficiency?
+      - What shows best vs worst performers?
+      - What supports real decisions?
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📊 SELECT HIGH-VALUE INSIGHTS ONLY
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Focus on strong analytical angles such as:
+    - Overall performance overview
+    - Trends over time
+    - Top vs bottom performers
+    - Profitability & margin drivers
+    - Regional or segment contribution
+    - Growth vs decline segments
+    - Efficiency & productivity signals
+    - Risk & loss exposure
+    - Opportunity discovery
+    - Deep-dive breakdowns
+
+    Avoid:
+    - Redundant charts
+    - Trivial breakdowns
+    - Low-impact or vanity insights
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📖 BUILD A STORY-DRIVEN ANALYTICS FLOW
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Order configs as an executive narrative:
+    1. Overall performance summary
+    2. Time-based trends
+    3. Top & bottom contributors
+    4. Profitability / efficiency drivers
+    5. Growth & decline segments
+    6. Regional / segment contribution
+    7. Risk & weak areas
+    8. Opportunity discovery
+    9. Strategic deep-dives
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📈 VISUALIZATION SELECTION RULES
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    - Trends → Line / Area
+    - Rankings → Bar / Horizontal Bar
+    - Comparisons → Grouped Bar
+    - Contribution → Pie / Ring
+    - Correlation → Scatter
+    - Breakdown → Pivot / Table
+    - Distribution → Histogram
+
+    Visualization must serve insight clarity — not aesthetics.
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🏗 EXAMPLE OUTPUT STYLE (DO NOT COPY - JUST LEARN FORMAT):
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     [
       {
         "baseTableName": ${tableName},
@@ -73,23 +157,25 @@ export const getConfig = async ({tableSchema, tableName}) => {
         ],
         "userFilters": [{"tableName": ${tableName}, "columnName": "Category", "operation": "actual"}],
         "isAxisMerge": "false"
-      },
+      }...
     ]
-    
 
-    ------------------------------------
-    NOW GENERATE:
-    - Minimum 10 configs
-    - Maximum creativity
-    - Diverse insights
-    - Strong real-world analytics value
-    - Also keep the result in a json format like above without additional text
-    - I'll parse the result and use it to generate a report
-    - Don't change the tableName and use it in baseTableName
-    - Only use the allowed values in configFields
-    - Don't use any other values in configFields
-    ;
-    }
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🏗 OUTPUT REQUIREMENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    - Minimum **10** configs
+    - Each config answers a **UNIQUE business question**
+    - Use ONLY real table + column names
+    - Follow Zoho CONFIG_SCHEMA strictly
+    - Maintain narrative order
+    - Validate schema correctness before output
+    - OUTPUT ONLY the final JSON ARRAY — nothing else
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🏆 FINAL EXPECTATION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Your output must feel like a **senior BI consultant delivering executive-ready analytics**, not an automated chart generator.
+
   `;
 
   const response = await askGemini(prompt);
