@@ -22,6 +22,7 @@ const DOM = {
   dashboard: {
     container: document.getElementById('iframe-container'),
     reset: document.getElementById('reset-btn'),
+    download: document.getElementById('download-btn'),
   },
 };
 
@@ -62,6 +63,7 @@ function setupEventListeners() {
   // Buttons
   DOM.error.retry.addEventListener('click', resetUI);
   DOM.dashboard.reset.addEventListener('click', resetUI);
+  DOM.dashboard.download.addEventListener('click', downloadReport);
 }
 
 // --- Core Logic ---
@@ -157,3 +159,33 @@ function startFakeProgress() {
     }
   }, 200);
 }
+
+// Download Report
+
+const downloadReport = async () => {
+  const element = document.getElementById('view-dashboard');
+  const canvas = await html2canvas(element, {scale: 2});
+
+  const imgData = canvas.toDataURL('image/png');
+
+  const {jsPDF} = window.jspdf;
+  console.log(jsPDF);
+  const pdf = new jsPDF('p', 'mm', 'a4');
+
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  while (heightLeft > 0) {
+    pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight);
+    heightLeft -= pageHeight;
+    position -= pageHeight;
+    if (heightLeft > 0) pdf.addPage();
+  }
+
+  pdf.save('output.pdf');
+};
