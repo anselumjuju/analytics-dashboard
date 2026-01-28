@@ -100,6 +100,26 @@ export const validateConfig = (tableName, uploadedDataSchema, configs) => {
     if (config.mergeAxisInfo == null) delete config.mergeAxisInfo;
   });
 
+  // Since some values for userFilter operations is not working
+  // If userFilter is with columnType Date, remove the userFilter
+  let userFiltersRemoved = 0;
+  configs = configs.map((config) => {
+    if ('userFilters' in config && config.userFilters) {
+      config.userFilters = config.userFilters.filter((userFilter) => {
+        if (['actual', 'seasonal', 'relative'].includes(userFilter.operation)) {
+          const dataType = uploadedDataSchema[userFilter.columnName];
+          if (dataType == 'Date') {
+            userFiltersRemoved++;
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+    return config;
+  });
+  if (userFiltersRemoved > 0) console.log(`Removed ${userFiltersRemoved} userFilters for invalid operations`);
+
   // Validate important fields
   const impBaseFields = ['baseTableName', 'title', 'reportType', 'axisColumns'];
   const impAxisFields = ['type', 'operation', 'columnName'];

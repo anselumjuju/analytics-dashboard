@@ -157,7 +157,7 @@ function startFakeProgress() {
       progress += Math.random() * 5;
       updateProgressBar(progress);
     }
-  }, 200);
+  }, 700);
 }
 
 // Download Report
@@ -169,7 +169,6 @@ const downloadReport = async () => {
   const imgData = canvas.toDataURL('image/png');
 
   const {jsPDF} = window.jspdf;
-  console.log(jsPDF);
   const pdf = new jsPDF('p', 'mm', 'a4');
 
   const pageHeight = pdf.internal.pageSize.getHeight();
