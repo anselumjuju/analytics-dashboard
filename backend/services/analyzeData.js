@@ -31,7 +31,7 @@ export const analyzeData = async (req, res) => {
   console.log(`View IDs: ${viewIDs.length}`);
 
   // // Use viewIDs to get embed URLs
-  const embedURLs = await getPrivateEmbedURL(viewIDs);
+  const embedURLs = await getPrivateEmbedURL(viewIDs.slice(0, 14));
   console.log(`Embed URLs: ${embedURLs.length}`);
 
   return res.json({

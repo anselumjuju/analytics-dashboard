@@ -12,7 +12,7 @@ export const createReport = async (uploadDataResponse) => {
   const {tableName, data} = uploadDataResponse;
   const {columnDetails} = data;
 
-  const isTesting = true;
+  const isTesting = false;
 
   const baseURL = process.env.ZOHO_AUTH_ANALYTICS_URL;
   const accessToken = await getZohoAccessToken();
@@ -21,11 +21,11 @@ export const createReport = async (uploadDataResponse) => {
   let configs = null;
 
   if (!isTesting) {
-    console.log('Gemini request for analysis...');
+    console.log('Requesting gemini for analysis...');
     const rawConfigs = await getConfig({tableSchema: columnDetails, tableName});
-    console.log('rawConfigs', rawConfigs);
+    console.log('rawConfigs ', rawConfigs.length);
     const validatedConfigs = validateConfig(tableName, columnDetails, rawConfigs);
-    console.log('validatedConfigs', validatedConfigs);
+    console.log('validatedConfigs ', validatedConfigs.length);
 
     configs = validatedConfigs;
   } else {
@@ -51,7 +51,7 @@ export const createReport = async (uploadDataResponse) => {
       });
 
       if (!response.ok) {
-        console.error('Zoho API Error:', await response.text());
+        console.error('Create Report API Error:\n', await response.text());
         return null;
       }
 
