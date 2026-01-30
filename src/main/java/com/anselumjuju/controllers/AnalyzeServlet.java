@@ -25,6 +25,7 @@ import java.util.Map;
 public class AnalyzeServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        System.out.println("\n\n\n\n\nAnalyzing...");
         Part filePart = req.getPart("file");
 
         if (filePart == null) {
@@ -49,24 +50,42 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
         System.out.println("File uploaded successfully");
+        System.out.println(uploadResponse);
 
 //        Generate Configs by Gemini
-        List<String> configs = GetConfig.getConfig();
+        List<Map<String, Object>> configs = GetConfig.getConfig(uploadResponse);
+        if(configs == null){
+            res.setStatus(500);
+            res.getWriter().write("Failed to generate configs");
+            return;
+        }
+        System.out.println("Configs generated successfully");
+        System.out.println(configs);
 
 //        Create Reports and returns viewIDs
         List<String> viewIds = CreateReport.createReports(configs);
+        if(viewIds == null){
+            res.setStatus(500);
+            res.getWriter().write("Failed to create reports");
+            return;
+        }
+        System.out.println("Reports created successfully");
+        System.out.println(viewIds);
 
 //        Get Private Embed URLs
         List<String> embedUrls = CreateEmbedUrls.createEmbedUrls(viewIds);
-        embedUrls = new ArrayList<>();
-        embedUrls.add("helloWorld.com");
-        embedUrls.add("helloServlet.com");
+        if(embedUrls == null){
+            res.setStatus(500);
+            res.getWriter().write("Failed to create embedUrls");
+        }
+        System.out.println("Embed URLs created successfully");
+        System.out.println(embedUrls);
+
 
 //        Return Embed URLs
         JsonObject result = new JsonObject();
         result.addProperty("result", "success");
         result.addProperty("urls", embedUrls.toString());
-
 
         res.setStatus(200);
         res.getWriter().write(result.toString());

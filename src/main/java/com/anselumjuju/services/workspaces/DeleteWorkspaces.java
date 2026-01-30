@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,23 +20,17 @@ public class DeleteWorkspaces {
         int deletedWorkspaces = 0;
 
         try (HttpClient client = HttpClient.newHttpClient()) {
-            List<CompletableFuture<Boolean>> futures = workspaces.stream()
-                    .map(id -> {
-                        try {
-                            return deleteWorkspaceById(client, id);
-                        } catch (Exception e) {
-                            System.out.println("Error preparing workspace deletion for " + id + ": " + e.getMessage());
-                            return CompletableFuture.completedFuture(false);
-                        }
-                    })
-                    .toList();
+            List<CompletableFuture<Boolean>> futures = new ArrayList<>();
 
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            for (String workspaceId : workspaces)
+                futures.add(deleteWorkspaceById(client, workspaceId));
 
-            deletedWorkspaces = (int) futures.stream()
-                    .map(CompletableFuture::join)
-                    .filter(Boolean::booleanValue)
-                    .count();
+            List<Boolean> results = new ArrayList<>();
+            for (CompletableFuture<Boolean> future : futures)
+                results.add(future.join());
+
+            for (Boolean result : results)
+                if (result) deletedWorkspaces++;
 
         } catch (Exception e) {
             System.out.println("Error deleting workspaces " + e.getMessage());

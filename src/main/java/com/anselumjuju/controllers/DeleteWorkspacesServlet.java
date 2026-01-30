@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-
 @WebServlet("/delete-workspaces")
 public class DeleteWorkspacesServlet extends HttpServlet {
     @Override
