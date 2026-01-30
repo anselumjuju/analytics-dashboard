@@ -14,26 +14,29 @@ import java.util.List;
 import java.util.Map;
 
 public class GetAllWorkspaces {
-    static String accessCode = AccessToken.getAccessToken();
-    static String analyticsUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
+    static final String ANALYTICS_URL = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
+    static final String URL = ANALYTICS_URL + "/restapi/v2/workspaces";
 
     //    Returns workspaceIds after filtering out auto generated workspaces
     public static List<String> getAllOwnedWorkspaces() {
-        String url = analyticsUrl + "/restapi/v2/workspaces";
 
         try (HttpClient client = HttpClient.newHttpClient()) {
+            String accessCode = AccessToken.getAccessToken();
             HttpRequest req = HttpRequest.newBuilder()
-                    .uri(new URI(url))
+                    .uri(new URI(URL))
                     .header("Authorization", "Zoho-oauthtoken " + accessCode)
                     .GET()
                     .build();
 
             HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
 
+            if (response.statusCode() != 200) {
+                System.out.println("Failed to fetch workspaces");
+                return null;
+            }
+
             Gson gson = new Gson();
-            Map<String, Object> body = gson.fromJson(
-                    response.body(),
-                    new TypeToken<Map<String, Object>>() {
+            Map<String, Object> body = gson.fromJson(response.body(), new TypeToken<Map<String, Object>>() {
                     }.getType()
             );
 
@@ -42,16 +45,16 @@ public class GetAllWorkspaces {
 
             List<String> workspaceIds = new ArrayList<>();
             for (Map<String, Object> workspace : ownedWorkspaces) {
-                String workspaceName = (String) workspace.get("workspaceName");
-                if (workspaceName.startsWith("workspace_"))
-                    workspaceIds.add((String) workspace.get("workspaceId"));
+                String name = (String) workspace.get("workspaceName");
+                String id = (String) workspace.get("workspaceId");
+                if (name != null && id != null && name.startsWith("workspace_"))
+                    workspaceIds.add(id);
             }
 
             return workspaceIds;
         } catch (Exception e) {
             System.out.println("Error getting all owned workspaces " + e.getMessage());
+            return null;
         }
-
-        return null;
     }
 }

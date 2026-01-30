@@ -26,36 +26,38 @@ public class CreateWorkSpace {
 
         JsonObject params = new JsonObject();
         params.addProperty("workspaceName", workspaceName);
-        String paramsString = params.toString();
 
-        String url = baseUrl + "/restapi/v2/workspaces?CONFIG=" + Utils.encode(paramsString);
+        String encodedConfig = Utils.encode(params.toString());
+        String url = baseUrl + "/restapi/v2/workspaces?CONFIG=" + encodedConfig;
 
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(new URI(url))
                     .header("Authorization", "Zoho-oauthtoken " + accessCode)
                     .header("ZANALYTICS-ORGID", orgId)
-                    .POST(HttpRequest.BodyPublishers.ofString(paramsString))
+                    .POST(HttpRequest.BodyPublishers.noBody())
                     .build();
 
             HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
 
+            if (res.statusCode() != 200) {
+                System.out.println("Workspace creation failed");
+                return false;
+            }
+
             Gson gson = new Gson();
-            Map<String, Object> body = gson.fromJson(
-                    res.body(),
-                    new TypeToken<Map<String, Object>>() {
-                    }.getType()
-            );
+            Map<String, Object> body = gson.fromJson(res.body(), new TypeToken<Map<String, Object>>() {
+            }.getType());
 
             Map<String, Object> data = (Map<String, Object>) body.get("data");
             String workspaceId = (String) data.get("workspaceId");
 
             TokenStore.setWorkspaceId(workspaceId);
+
+            return true;
         } catch (Exception e) {
             System.out.println("Error creating workspace " + e.getMessage());
             return false;
         }
-
-        return true;
     }
 }

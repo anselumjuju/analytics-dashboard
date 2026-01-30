@@ -10,25 +10,44 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/delete-workspaces")
+@WebServlet("/api/delete-workspaces")
 public class DeleteWorkspacesServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        List<String> workspaces = GetAllWorkspaces.getAllOwnedWorkspaces();
 
-        int deletedWorkspaces = 0;
-        if (workspaces == null || workspaces.isEmpty()) {
-            System.out.println("No auto generated workspaces found");
-        } else {
-            deletedWorkspaces = DeleteWorkspaces.deleteWorkspaces(workspaces);
-            System.out.println("Deleted " + deletedWorkspaces + " auto generated workspaces");
+        try {
+            List<String> workspaces = GetAllWorkspaces.getAllOwnedWorkspaces();
+            if (workspaces == null || workspaces.isEmpty()) {
+                res.setStatus(200);
+                res.getWriter().write("""
+                            {
+                              "success": true,
+                              "message": "No auto-generated workspaces found",
+                              "data": { "deletedCount": 0 }
+                            }
+                        """);
+                return;
+            }
+
+            int deletedCount = DeleteWorkspaces.deleteWorkspaces(workspaces);
+            res.setStatus(HttpServletResponse.SC_OK);
+            res.getWriter().write(String.format("""
+                        {
+                          "success": true,
+                          "message": "Deleted %d auto-generated workspaces",
+                          "data": { "deletedCount": %d }
+                        }
+                    """, deletedCount, deletedCount));
+        } catch (Exception e) {
+            res.setStatus(500);
+            res.getWriter().write(String.format("""
+                        {
+                          "success": false,
+                          "status": 500,
+                          "message": "Failed to delete workspaces",
+                          "details": "%s"
+                        }
+                    """, e.getMessage()));
         }
-        res.getWriter().write(String.format("""
-                {
-                    "status":"success",
-                    "message":"Deleted %s auto generated workspaces",
-                }
-                """, deletedWorkspaces)
-        );
     }
 }

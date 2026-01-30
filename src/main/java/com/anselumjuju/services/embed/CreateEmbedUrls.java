@@ -4,6 +4,7 @@ import com.anselumjuju.lib.EnvConfig;
 import com.anselumjuju.stores.TokenStore;
 import com.anselumjuju.utils.AccessToken;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -15,23 +16,24 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateEmbedUrls {
-    static String accessCode = AccessToken.getAccessToken();
-    static String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
-    static String analyticsUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
-    static String workspaceId = TokenStore.getWorkspaceId();
 
-    public static List<String> createEmbedUrls(List<String> viewIds){
-        viewIds.removeIf(viewId -> viewId == null);
+    public static List<String> createEmbedUrls(List<String> viewIds) {
+        String accessCode = AccessToken.getAccessToken();
+        String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
+        String analyticsUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
+        String workspaceId = TokenStore.getWorkspaceId();
 
-        try(HttpClient client = HttpClient.newHttpClient()){
+        try (HttpClient client = HttpClient.newHttpClient()) {
             List<CompletableFuture<String>> futures = new ArrayList<>();
 
-            for(String viewId: viewIds)
-                futures.add(getEmbedUrl(client, viewId));
+            for (String viewId : viewIds)
+                if (viewId != null)
+                    futures.add(getEmbedUrl(client, accessCode, orgId, analyticsUrl, workspaceId, viewId));
 
             List<String> embedUrls = new ArrayList<>();
-            for(CompletableFuture<String> future: futures)
-                embedUrls.add(future.join());
+            for (CompletableFuture<String> future : futures)
+                if (future.join() != null)
+                    embedUrls.add(future.join());
 
             return embedUrls;
         } catch (Exception e) {
@@ -40,21 +42,27 @@ public class CreateEmbedUrls {
         }
     }
 
-    private static CompletableFuture<String> getEmbedUrl(HttpClient client, String viewId) throws Exception{
-        String url = analyticsUrl + "/restapi/v2/workspaces/" + workspaceId + "/views/" + viewId + "/publish/privatelink";
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .header("Authorization", "Zoho-oauthtoken " + accessCode)
-                .header("ZANALYTICS-ORGID", orgId)
-                .POST(HttpRequest.BodyPublishers.ofString("{}"))
-                .build();
+    private static CompletableFuture<String> getEmbedUrl(HttpClient client, String accessCode, String orgId, String analyticsUrl, String workspaceId, String viewId) {
+        try {
+            String url = analyticsUrl + "/restapi/v2/workspaces/" + workspaceId + "/views/" + viewId + "/publish/privatelink";
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(new URI(url))
+                    .header("Authorization", "Zoho-oauthtoken " + accessCode)
+                    .header("ZANALYTICS-ORGID", orgId)
+                    .POST(HttpRequest.BodyPublishers.ofString("{}"))
+                    .build();
 
-        return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                .thenApply(res -> {
-                    Map<String, Object> body = new Gson().fromJson(res.body(), Map.class);
-                    Map<String, Object> data = (Map<String, Object>) body.get("data");
-                    return data.get("privateUrl").toString();
-                })
-                .exceptionally(ex -> null);
+            return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
+                    .thenApply(res -> {
+                        if (res.statusCode() != 200) return null;
+                        Map<String, Object> body = new Gson().fromJson(res.body(), new TypeToken<Map<String, Object>>() {
+                        }.getType());
+                        Map<String, Object> data = (Map<String, Object>) body.get("data");
+                        return data.get("privateUrl").toString();
+                    })
+                    .exceptionally(ex -> null);
+        } catch (Exception e) {
+            return CompletableFuture.completedFuture(null);
+        }
     }
 }

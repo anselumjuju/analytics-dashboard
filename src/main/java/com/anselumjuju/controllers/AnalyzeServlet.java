@@ -5,6 +5,7 @@ import com.anselumjuju.services.embed.CreateEmbedUrls;
 import com.anselumjuju.services.reports.CreateReport;
 import com.anselumjuju.services.upload.DataUpload;
 import com.anselumjuju.services.workspaces.CreateWorkSpace;
+import com.anselumjuju.utils.SendError;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -22,71 +23,67 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet("/analyze")
+@WebServlet("/api/analyze")
 @MultipartConfig
 public class AnalyzeServlet extends HttpServlet {
+
+    private static final Gson gson = new Gson();
+
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-        System.out.println("\n\n\n\n\nAnalyzing...\n");
+        System.out.println("\n\n\n\n\nAnalyzing...");
         Part filePart = req.getPart("file");
 
         if (filePart == null) {
-            res.setStatus(400);
-            res.getWriter().write("No file uploaded");
+            SendError.sendError(res, 400, "No file uploaded");
             return;
         }
 
-//        Create a new Workspace
+        // 1. Creating Workspace
+        System.out.println("Creating workspace");
         Boolean workspaceCreated = CreateWorkSpace.createWorkspace();
         if (!workspaceCreated) {
-            res.setStatus(500);
-            res.getWriter().write("Failed to create workspace");
+            SendError.sendError(res, 500, "Failed to create workspace");
             return;
         }
-        System.out.println("Workspace created successfully");
 
-//        Upload to Workspace
+        // 2. Uploading File to Workspace
+        System.out.println("Uploading file to workspace");
         Map<String, Object> uploadResponse = DataUpload.uploadFile(filePart);
         if (uploadResponse == null) {
-            res.setStatus(500);
-            res.getWriter().write("Failed to upload file ");
+            SendError.sendError(res, 400, "Failed to upload file");
             return;
         }
-        System.out.println("File uploaded successfully");
 
-//        Generate Configs by Gemini
+        // 3. Generate Configs from Gemini
+        System.out.println("Generating configs from Gemini");
         List<Map<String, Object>> configs = GetConfig.getConfig(uploadResponse);
         if (configs == null) {
-            res.setStatus(500);
-            res.getWriter().write("Failed to generate configs");
+            SendError.sendError(res, 400, "Failed to load configs");
             return;
         }
-        System.out.println("Configs generated successfully");
 
-//        Create Reports and returns viewIDs
+        // 4. Creating Reports
+        System.out.println("Creating Reports");
         List<String> viewIds = CreateReport.createReports(configs);
         if (viewIds == null) {
-            res.setStatus(500);
-            res.getWriter().write("Failed to create reports");
+            SendError.sendError(res, 400, "Failed to create Reports");
             return;
         }
-        System.out.println("Reports created successfully");
 
-//        Get Private Embed URLs
+        // 5. Creating Embed URLs
+        System.out.println("Creating Embed URLs");
         List<String> embedUrls = CreateEmbedUrls.createEmbedUrls(viewIds);
         if (embedUrls == null) {
-            res.setStatus(500);
-            res.getWriter().write("Failed to create embedUrls");
+            SendError.sendError(res, 400, "Failed to create Embed URLs");
+            return;
         }
-        System.out.println("Embed URLs created successfully");
-        System.out.println("Embed Urls: " + embedUrls);
 
-
-//        Return Embed URLs
+        // 6. Success Response
         Map<String, Object> result = new HashMap<>();
-        result.put("result", "success");
+        result.put("success", true);
+        result.put("message", "Analysis completed");
         result.put("urls", embedUrls);
-        Gson gson = new Gson();
 
         res.setStatus(200);
         res.getWriter().write(gson.toJson(result));

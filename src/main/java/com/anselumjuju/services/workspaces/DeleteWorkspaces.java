@@ -12,44 +12,47 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class DeleteWorkspaces {
-    static String accessCode = AccessToken.getAccessToken();
-    static String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
-    static String analyticsUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
+    static final String ORG_ID = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
+    static final String ANALYTICS_URL = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
 
     public static int deleteWorkspaces(List<String> workspaces) {
-        int deletedWorkspaces = 0;
+        if (workspaces == null || workspaces.isEmpty()) return 0;
 
         try (HttpClient client = HttpClient.newHttpClient()) {
+            String accessCode = AccessToken.getAccessToken();
             List<CompletableFuture<Boolean>> futures = new ArrayList<>();
 
             for (String workspaceId : workspaces)
-                futures.add(deleteWorkspaceById(client, workspaceId));
+                futures.add(deleteWorkspaceById(client, accessCode, workspaceId));
 
-            List<Boolean> results = new ArrayList<>();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            int deletedCount = 0;
             for (CompletableFuture<Boolean> future : futures)
-                results.add(future.join());
+                if (future.join()) deletedCount++;
 
-            for (Boolean result : results)
-                if (result) deletedWorkspaces++;
-
+            return deletedCount;
         } catch (Exception e) {
             System.out.println("Error deleting workspaces " + e.getMessage());
+            return 0;
         }
-
-        return deletedWorkspaces;
     }
 
-    public static CompletableFuture<Boolean> deleteWorkspaceById(HttpClient client, String workspaceId) throws Exception {
-        String url = analyticsUrl + "/restapi/v2/workspaces/" + workspaceId;
+    public static CompletableFuture<Boolean> deleteWorkspaceById(HttpClient client, String accessCode, String workspaceId) throws Exception {
+        String url = ANALYTICS_URL + "/restapi/v2/workspaces/" + workspaceId;
+
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(new URI(url))
                 .header("Authorization", "Zoho-oauthtoken " + accessCode)
-                .header("ZANALYTICS-ORGID", orgId)
+                .header("ZANALYTICS-ORGID", ORG_ID)
                 .DELETE()
                 .build();
 
         return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                 .thenApply(res -> res.statusCode() >= 200 && res.statusCode() < 300)
-                .exceptionally(ex -> false);
+                .exceptionally(ex -> {
+                    System.err.println("Failed to delete workspace " + workspaceId + ": " + ex.getMessage());
+                    return false;
+                });
     }
 }

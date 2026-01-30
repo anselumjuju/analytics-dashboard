@@ -5,6 +5,7 @@ import com.anselumjuju.stores.TokenStore;
 import com.anselumjuju.utils.AccessToken;
 import com.anselumjuju.utils.Utils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,27 +15,33 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateReport {
-    private static String baseUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
-    private static String workspaceId = TokenStore.getWorkspaceId();
-    private static String accessCode = AccessToken.getAccessToken();
-    private static String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
 
     public static List<String> createReports(List<Map<String, Object>> configs) {
+
+        String baseUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
+        String workspaceId = TokenStore.getWorkspaceId();
+        String accessCode = AccessToken.getAccessToken();
+        String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
+
         Gson gson = new Gson();
-        List<String> params = new ArrayList<>();
-        for (Map<String, Object> config : configs)
-            params.add(Utils.encode(gson.toJson(config)));
+
+        List<String> viewIds = new ArrayList<>();
+        List<CompletableFuture<String>> futures = new ArrayList<>();
 
         String url = baseUrl + "/restapi/v2/workspaces/" + workspaceId + "/reports?CONFIG=";
 
         try (HttpClient client = HttpClient.newHttpClient()) {
-            List<CompletableFuture<String>> futures = new ArrayList<>();
-            for (String param : params)
-                futures.add(createReport(client, url, param));
+            List<String> params = new ArrayList<>();
+            for (Map<String, Object> config : configs)
+                params.add(Utils.encode(gson.toJson(config)));
 
-            List<String> viewIds = new ArrayList<>();
+            for (String param : params)
+                futures.add(createReport(client, accessCode, orgId, url, param));
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
             for (CompletableFuture<String> future : futures)
-                viewIds.add(future.join());
+                if (future.join() != null) viewIds.add(future.join());
 
             return viewIds;
         } catch (Exception e) {
@@ -43,20 +50,28 @@ public class CreateReport {
         }
     }
 
-    private static CompletableFuture<String> createReport(HttpClient client, String url, String config) throws Exception {
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(new URI(url + config))
-                .header("Authorization", "Zoho-oauthtoken " + accessCode)
-                .header("ZANALYTICS-ORGID", orgId)
-                .POST(HttpRequest.BodyPublishers.ofString(config))
-                .build();
+    private static CompletableFuture<String> createReport(HttpClient client, String accessCode, String orgId, String url, String config) {
+        try {
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(new URI(url + config))
+                    .header("Authorization", "Zoho-oauthtoken " + accessCode)
+                    .header("ZANALYTICS-ORGID", orgId)
+                    .POST(HttpRequest.BodyPublishers.ofString(config))
+                    .build();
 
-        return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                .thenApply(res -> {
-                    Map<String, Object> body = new Gson().fromJson(res.body(), Map.class);
-                    Map<String, Object> data = (Map<String, Object>) body.get("data");
-                    return data.get("viewId").toString();
-                })
-                .exceptionally(ex -> null);
+            return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
+                    .thenApply(res -> {
+                        if (res.statusCode() != 200) return null;
+
+                        Map<String, Object> body = new Gson().fromJson(res.body(), new TypeToken<Map<String, Object>>() {
+                        }.getType());
+                        Map<String, Object> data = (Map<String, Object>) body.get("data");
+
+                        return data.get("viewId").toString();
+                    })
+                    .exceptionally(ex -> null);
+        } catch (Exception e) {
+            return CompletableFuture.completedFuture(null);
+        }
     }
 }

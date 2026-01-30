@@ -18,7 +18,7 @@ public class AllowedValueResolver {
             }
         }
 
-        return bestScore >= threshold ? best : null;
+        return bestScore >= threshold ? best : allowedValues.size() > 1 ? allowedValues.getFirst() : null;
     }
 
     public static String resolveFromAllowed(String input, List<String> allowedValues) {
