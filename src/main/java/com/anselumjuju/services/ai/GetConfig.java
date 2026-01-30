@@ -24,6 +24,7 @@ public class GetConfig {
             List<Map<String, Object>> validatedConfigs = ValidateConfigs.validateConfigs(tableName, tableSchema, configs);
             return validatedConfigs;
         } catch (Exception e) {
+            System.out.println("Error getting configs " + e.getMessage());
             return null;
         }
     }

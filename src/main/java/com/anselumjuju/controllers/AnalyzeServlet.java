@@ -5,6 +5,7 @@ import com.anselumjuju.services.embed.CreateEmbedUrls;
 import com.anselumjuju.services.reports.CreateReport;
 import com.anselumjuju.services.upload.DataUpload;
 import com.anselumjuju.services.workspaces.CreateWorkSpace;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +33,7 @@ public class AnalyzeServlet extends HttpServlet {
         if (filePart == null) {
             res.setStatus(400);
             res.getWriter().write("No file uploaded");
+            return;
         }
 
 //        Create a new Workspace
@@ -53,7 +56,7 @@ public class AnalyzeServlet extends HttpServlet {
 
 //        Generate Configs by Gemini
         List<Map<String, Object>> configs = GetConfig.getConfig(uploadResponse);
-        if(configs == null){
+        if (configs == null) {
             res.setStatus(500);
             res.getWriter().write("Failed to generate configs");
             return;
@@ -62,7 +65,7 @@ public class AnalyzeServlet extends HttpServlet {
 
 //        Create Reports and returns viewIDs
         List<String> viewIds = CreateReport.createReports(configs);
-        if(viewIds == null){
+        if (viewIds == null) {
             res.setStatus(500);
             res.getWriter().write("Failed to create reports");
             return;
@@ -71,19 +74,21 @@ public class AnalyzeServlet extends HttpServlet {
 
 //        Get Private Embed URLs
         List<String> embedUrls = CreateEmbedUrls.createEmbedUrls(viewIds);
-        if(embedUrls == null){
+        if (embedUrls == null) {
             res.setStatus(500);
             res.getWriter().write("Failed to create embedUrls");
         }
         System.out.println("Embed URLs created successfully");
+        System.out.println("Embed Urls: " + embedUrls);
 
 
 //        Return Embed URLs
-        JsonObject result = new JsonObject();
-        result.addProperty("result", "success");
-        result.addProperty("urls", embedUrls.toString());
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "success");
+        result.put("urls", embedUrls);
+        Gson gson = new Gson();
 
         res.setStatus(200);
-        res.getWriter().write(result.toString());
+        res.getWriter().write(gson.toJson(result));
     }
 }

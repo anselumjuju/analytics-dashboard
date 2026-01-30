@@ -35,6 +35,7 @@ public class CreateEmbedUrls {
 
             return embedUrls;
         } catch (Exception e) {
+            System.out.println("Failed to create Embed Urls " + e.getMessage());
             return null;
         }
     }

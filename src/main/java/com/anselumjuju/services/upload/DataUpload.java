@@ -70,9 +70,8 @@ public class DataUpload {
             return result;
         } catch (Exception e) {
             System.out.println("Error uploading file " + e.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     private static HttpRequest.BodyPublisher buildMultipartBody(Part filePart, String boundary) throws Exception {
