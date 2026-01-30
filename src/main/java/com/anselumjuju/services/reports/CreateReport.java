@@ -20,8 +20,6 @@ public class CreateReport {
     private static String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
 
     public static List<String> createReports(List<Map<String, Object>> configs) {
-        System.out.println("\n\n\nCreating Reports...");
-
         Gson gson = new Gson();
         List<String> params = new ArrayList<>();
         for (Map<String, Object> config : configs)
@@ -50,12 +48,13 @@ public class CreateReport {
                 .uri(new URI(url + config))
                 .header("Authorization", "Zoho-oauthtoken " + accessCode)
                 .header("ZANALYTICS-ORGID", orgId)
-                .POST(HttpRequest.BodyPublishers.ofString(null))
+                .POST(HttpRequest.BodyPublishers.ofString(config))
                 .build();
 
         return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                 .thenApply(res -> {
-                    Map<String, Object> data = new Gson().fromJson(res.body(), Map.class);
+                    Map<String, Object> body = new Gson().fromJson(res.body(), Map.class);
+                    Map<String, Object> data = (Map<String, Object>) body.get("data");
                     return data.get("viewId").toString();
                 })
                 .exceptionally(ex -> null);

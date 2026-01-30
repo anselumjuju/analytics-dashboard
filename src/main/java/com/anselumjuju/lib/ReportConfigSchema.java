@@ -2,9 +2,9 @@ package com.anselumjuju.lib;
 
 public class ReportConfigSchema {
     public static String reportConfigSchema() {
-        return """
+        String reportConfigSchema = """
                 {
-                  baseTableName: {type: 'String', required: true, description: 'Name of the base table used to create report'},
+                  "baseTableName": {type: 'String', required: true, description: 'Name of the base table used to create report'},
                   title: {type: 'String', required: true, description: 'Name of the report'},
                   description: {type: 'String', required: false, description: 'Description of the report'},
                   reportType: {type: 'String', required: true, allowedValues: ['chart', 'pivot', 'summary']},
@@ -139,5 +139,6 @@ public class ReportConfigSchema {
                 };
                 """;
 
+        return reportConfigSchema;
     }
 }

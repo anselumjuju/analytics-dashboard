@@ -25,7 +25,7 @@ import java.util.Map;
 public class AnalyzeServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-        System.out.println("\n\n\n\n\nAnalyzing...");
+        System.out.println("\n\n\n\n\nAnalyzing...\n");
         Part filePart = req.getPart("file");
 
         if (filePart == null) {
@@ -50,7 +50,6 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
         System.out.println("File uploaded successfully");
-        System.out.println(uploadResponse);
 
 //        Generate Configs by Gemini
         List<Map<String, Object>> configs = GetConfig.getConfig(uploadResponse);
@@ -60,7 +59,6 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
         System.out.println("Configs generated successfully");
-        System.out.println(configs);
 
 //        Create Reports and returns viewIDs
         List<String> viewIds = CreateReport.createReports(configs);
@@ -70,7 +68,6 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
         System.out.println("Reports created successfully");
-        System.out.println(viewIds);
 
 //        Get Private Embed URLs
         List<String> embedUrls = CreateEmbedUrls.createEmbedUrls(viewIds);
@@ -79,7 +76,6 @@ public class AnalyzeServlet extends HttpServlet {
             res.getWriter().write("Failed to create embedUrls");
         }
         System.out.println("Embed URLs created successfully");
-        System.out.println(embedUrls);
 
 
 //        Return Embed URLs

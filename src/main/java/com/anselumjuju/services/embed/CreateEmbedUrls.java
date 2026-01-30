@@ -21,6 +21,8 @@ public class CreateEmbedUrls {
     static String workspaceId = TokenStore.getWorkspaceId();
 
     public static List<String> createEmbedUrls(List<String> viewIds){
+        viewIds.removeIf(viewId -> viewId == null);
+
         try(HttpClient client = HttpClient.newHttpClient()){
             List<CompletableFuture<String>> futures = new ArrayList<>();
 
@@ -43,12 +45,13 @@ public class CreateEmbedUrls {
                 .uri(new URI(url))
                 .header("Authorization", "Zoho-oauthtoken " + accessCode)
                 .header("ZANALYTICS-ORGID", orgId)
-                .DELETE()
+                .POST(HttpRequest.BodyPublishers.ofString("{}"))
                 .build();
 
         return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                 .thenApply(res -> {
-                    Map<String, Object> data = new Gson().fromJson(res.body(), Map.class);
+                    Map<String, Object> body = new Gson().fromJson(res.body(), Map.class);
+                    Map<String, Object> data = (Map<String, Object>) body.get("data");
                     return data.get("privateUrl").toString();
                 })
                 .exceptionally(ex -> null);
