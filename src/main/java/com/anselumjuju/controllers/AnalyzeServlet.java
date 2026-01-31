@@ -1,5 +1,6 @@
 package com.anselumjuju.controllers;
 
+import com.anselumjuju.services.ProgressSocket;
 import com.anselumjuju.services.ai.GetConfig;
 import com.anselumjuju.services.embed.CreateEmbedUrls;
 import com.anselumjuju.services.reports.CreateReport;
@@ -34,11 +35,19 @@ public class AnalyzeServlet extends HttpServlet {
         System.out.println("\n\n\n\n\nAnalyzing...");
         Part filePart = req.getPart("file");
 
+        String jobId = req.getParameter("jobId");
+        if (jobId == null || jobId.isBlank()) {
+            SendError.sendError(res, 400, "Insufficient Parameters passed");
+            return;
+        }
+
         if (filePart == null) {
             SendError.sendError(res, 400, "No file uploaded");
             return;
         }
 
+
+        ProgressSocket.send(jobId, 10, "Getting things ready...");
         // 1. Creating Workspace
         System.out.println("Creating workspace");
         Boolean workspaceCreated = CreateWorkSpace.createWorkspace();
@@ -55,14 +64,17 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
+        ProgressSocket.send(jobId, 20, "Analyzing your report...");
         // 3. Generate Configs from Gemini
         System.out.println("Generating configs from Gemini");
-        List<Map<String, Object>> configs = GetConfig.getConfig(uploadResponse);
+        List<Map<String, Object>> configs = GetConfig.getConfig(uploadResponse, jobId);
         if (configs == null) {
             SendError.sendError(res, 400, "Failed to load configs");
             return;
         }
 
+
+        ProgressSocket.send(jobId, 65, "Designing your dashboard");
         // 4. Creating Reports
         System.out.println("Creating Reports");
         List<String> viewIds = CreateReport.createReports(configs);
@@ -71,14 +83,18 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
+
+        ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
         // 5. Creating Embed URLs
         System.out.println("Creating Embed URLs");
         List<String> embedUrls = CreateEmbedUrls.createEmbedUrls(viewIds);
-        if (embedUrls == null) {
+        if (embedUrls == null || embedUrls.isEmpty()) {
             SendError.sendError(res, 400, "Failed to create Embed URLs");
             return;
         }
 
+
+        ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
         // 6. Success Response
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);

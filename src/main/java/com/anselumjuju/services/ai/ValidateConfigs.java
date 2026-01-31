@@ -8,10 +8,6 @@ import java.util.stream.Collectors;
 public class ValidateConfigs {
     public static List<Map<String, Object>> validateConfigs(String tableName, Map<String, Object> tableSchema, List<Map<String, Object>> configs) {
 
-        System.out.println("\n\n\n\nBefore Validation: ");
-        for (Map<String, Object> config : configs)
-            System.out.println(config);
-
         // Validation Constants
 
         // Available Fields
@@ -254,11 +250,6 @@ public class ValidateConfigs {
             System.out.println("Error validating configs: " + e.getMessage());
             return null;
         }
-
-        System.out.println("\n\n\n\nAfter Validation: ");
-        for (Map<String, Object> config : configs)
-            System.out.println(config);
-
 
         return configs;
     }
