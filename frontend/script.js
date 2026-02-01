@@ -76,10 +76,9 @@ function setupEventListeners() {
 }
 
 function updateButtons() {
-  let isDisable = state.isProcessing || !state.selectedFile;
-  DOM.buttons.generate.disabled = isDisable;
-  DOM.buttons.regenerate.disabled = isDisable;
-  DOM.buttons.share.disabled = isDisable || !state.shareLink;
+  DOM.buttons.generate.disabled = state.isProcessing || !state.selectedFile;
+  DOM.buttons.regenerate.disabled = state.isProcessing;
+  DOM.buttons.share.disabled = state.isProcessing || !state.shareLink;
 }
 
 function handleFile(file) {
