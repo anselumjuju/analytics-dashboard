@@ -181,18 +181,7 @@ async function shareDashboard() {
     DOM.buttons.share.innerText = 'Copied';
     setTimeout(() => (DOM.buttons.share.innerText = 'Share'), 2000);
   } catch {
-    try {
-      const input = document.createElement('textarea');
-      input.value = state.shareLink;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      input.remove();
-      DOM.buttons.share.innerText = 'Copied';
-      setTimeout(() => (DOM.buttons.share.innerText = 'Share'), 2000);
-    } catch {
-      console.error(err);
-    }
+    console.error(err);
   }
 }
 
