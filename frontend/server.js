@@ -15,7 +15,6 @@ export async function analyzeFile(file, key) {
   }
 
   const data = await response.json();
-  console.log('Generated Data: ', data);
 
   return data;
 }
@@ -41,7 +40,6 @@ export async function getEmbedUrls(key, jobId) {
   }
 
   const data = await response.json();
-  console.log('Fetched Data: ', data);
 
   return data;
 }
