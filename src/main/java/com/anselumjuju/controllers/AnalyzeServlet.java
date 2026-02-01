@@ -4,12 +4,11 @@ import com.anselumjuju.services.ProgressSocket;
 import com.anselumjuju.services.ai.GetConfig;
 import com.anselumjuju.services.embed.CreateEmbedUrls;
 import com.anselumjuju.services.reports.CreateReport;
+import com.anselumjuju.services.encodeLinks.EncodeDecodeLinks;
 import com.anselumjuju.services.upload.DataUpload;
 import com.anselumjuju.services.workspaces.CreateWorkSpace;
 import com.anselumjuju.utils.SendError;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,7 +18,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,12 +91,15 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
+        System.out.println(embedUrls.size() + " Reports Created");
+
 
         ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
         // 6. Success Response
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         result.put("message", "Analysis completed");
+        result.put("key", EncodeDecodeLinks.encodeLinks(viewIds));
         result.put("urls", embedUrls);
 
         res.setStatus(200);
