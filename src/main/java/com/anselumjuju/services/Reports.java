@@ -1,9 +1,8 @@
-package com.anselumjuju.services.reports;
+package com.anselumjuju.services;
 
+import com.anselumjuju.lib.AccessToken;
 import com.anselumjuju.lib.EnvConfig;
-import com.anselumjuju.stores.TokenStore;
-import com.anselumjuju.utils.AccessToken;
-import com.anselumjuju.utils.Utils;
+import com.anselumjuju.lib.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -11,15 +10,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class CreateReport {
-
-    public static List<String> createReports(List<Map<String, Object>> configs) {
+public class Reports {
+    public static List<String> createReports(List<Map<String, Object>> configs, String workspaceId) {
 
         String baseUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
-        String workspaceId = TokenStore.getWorkspaceId();
         String accessCode = AccessToken.getAccessToken();
         String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
 

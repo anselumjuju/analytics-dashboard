@@ -1,13 +1,9 @@
 package com.anselumjuju.controllers;
 
-import com.anselumjuju.services.ProgressSocket;
+import com.anselumjuju.lib.Utils;
+import com.anselumjuju.services.*;
 import com.anselumjuju.services.ai.GetConfig;
-import com.anselumjuju.services.embed.CreateEmbedUrls;
-import com.anselumjuju.services.reports.CreateReport;
-import com.anselumjuju.services.encodeLinks.EncodeDecodeLinks;
-import com.anselumjuju.services.upload.DataUpload;
-import com.anselumjuju.services.workspaces.CreateWorkSpace;
-import com.anselumjuju.utils.SendError;
+import com.anselumjuju.lib.SendError;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -44,19 +40,18 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
-
         ProgressSocket.send(jobId, 10, "Getting things ready...");
         // 1. Creating Workspace
         System.out.println("Creating workspace");
-        Boolean workspaceCreated = CreateWorkSpace.createWorkspace();
-        if (!workspaceCreated) {
+        String workspaceId = Workspaces.createWorkspace();
+        if (workspaceId == null) {
             SendError.sendError(res, 500, "Failed to create workspace");
             return;
         }
 
         // 2. Uploading File to Workspace
         System.out.println("Uploading file to workspace");
-        Map<String, Object> uploadResponse = DataUpload.uploadFile(filePart);
+        Map<String, Object> uploadResponse = DataUpload.uploadFile(filePart, workspaceId);
         if (uploadResponse == null) {
             SendError.sendError(res, 400, "Failed to upload file");
             return;
@@ -76,7 +71,7 @@ public class AnalyzeServlet extends HttpServlet {
         ProgressSocket.send(jobId, 65, "Designing your dashboard");
         // 4. Creating Reports
         System.out.println("Creating Reports");
-        List<String> viewIds = CreateReport.createReports(configs);
+        List<String> viewIds = Reports.createReports(configs, workspaceId);
         if (viewIds == null) {
             SendError.sendError(res, 400, "Failed to create Reports");
             return;
@@ -86,7 +81,7 @@ public class AnalyzeServlet extends HttpServlet {
         ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
         // 5. Creating Embed URLs
         System.out.println("Creating Embed URLs for " + viewIds.size() + " Reports");
-        List<String> embedUrls = CreateEmbedUrls.createEmbedUrls(viewIds);
+        List<String> embedUrls = EmbedUrls.createEmbedUrls(viewIds, workspaceId);
         if (embedUrls == null || embedUrls.isEmpty()) {
             SendError.sendError(res, 400, "Failed to create Embed URLs");
             return;
@@ -100,7 +95,7 @@ public class AnalyzeServlet extends HttpServlet {
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         result.put("message", "Analysis completed");
-        result.put("key", EncodeDecodeLinks.encodeLinks(viewIds));
+        result.put("key", Utils.encodeLinks(viewIds, workspaceId));
         result.put("urls", embedUrls);
 
         res.setStatus(200);

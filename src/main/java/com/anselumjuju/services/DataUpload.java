@@ -1,9 +1,8 @@
-package com.anselumjuju.services.upload;
+package com.anselumjuju.services;
 
+import com.anselumjuju.lib.AccessToken;
 import com.anselumjuju.lib.EnvConfig;
-import com.anselumjuju.stores.TokenStore;
-import com.anselumjuju.utils.AccessToken;
-import com.anselumjuju.utils.Utils;
+import com.anselumjuju.lib.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -16,11 +15,10 @@ import java.net.http.HttpResponse;
 import java.util.*;
 
 public class DataUpload {
-    public static Map<String, Object> uploadFile(Part filePart) {
+    public static Map<String, Object> uploadFile(Part filePart, String workspaceId) {
         String baseUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
         String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
         String accessCode = AccessToken.getAccessToken();
-        String workspaceId = TokenStore.getWorkspaceId();
 
         String uniqueId = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 10);
         String tableName = "table_" + uniqueId;

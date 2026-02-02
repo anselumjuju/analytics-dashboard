@@ -1,8 +1,8 @@
-package com.anselumjuju.services.accessToken;
+package com.anselumjuju.services;
 
 import com.anselumjuju.lib.EnvConfig;
 import com.anselumjuju.stores.TokenStore;
-import com.anselumjuju.utils.Utils;
+import com.anselumjuju.lib.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

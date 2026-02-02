@@ -3,7 +3,6 @@ package com.anselumjuju.stores;
 public class TokenStore {
     private static String accessToken;
     private static String expiryTime;
-    private static String workspaceId;
 
     public static String getAccessToken() {
         return accessToken;
@@ -21,14 +20,6 @@ public class TokenStore {
         TokenStore.expiryTime = expiryTime;
     }
 
-    public static String getWorkspaceId() {
-        return workspaceId;
-    }
-
-    public static void setWorkspaceId(String workspaceId) {
-        TokenStore.workspaceId = workspaceId;
-    }
-
     public static boolean isTokenExpired(String expiryTime) {
         if (expiryTime == null || expiryTime.trim().isEmpty())
             return true;
@@ -36,5 +27,4 @@ public class TokenStore {
         long expiryTimeLong = (long) Double.parseDouble(expiryTime);
         return System.currentTimeMillis() >= expiryTimeLong;
     }
-
 }

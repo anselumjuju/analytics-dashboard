@@ -1,9 +1,8 @@
 package com.anselumjuju.services.ai;
 
-import com.anselumjuju.utils.AllowedValueResolver;
+import com.anselumjuju.lib.AllowedValueResolver;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ValidateConfigs {
     public static List<Map<String, Object>> validateConfigs(String tableName, Map<String, Object> tableSchema, List<Map<String, Object>> configs) {

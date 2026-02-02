@@ -1,6 +1,6 @@
-package com.anselumjuju.utils;
+package com.anselumjuju.lib;
 
-import com.anselumjuju.services.accessToken.GenerateAccessToken;
+import com.anselumjuju.services.GenerateAccessToken;
 import com.anselumjuju.stores.TokenStore;
 
 public class AccessToken {

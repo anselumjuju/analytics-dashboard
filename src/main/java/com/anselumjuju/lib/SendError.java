@@ -1,4 +1,4 @@
-package com.anselumjuju.utils;
+package com.anselumjuju.lib;
 
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletResponse;

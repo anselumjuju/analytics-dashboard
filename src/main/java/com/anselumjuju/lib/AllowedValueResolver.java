@@ -1,10 +1,12 @@
-package com.anselumjuju.utils;
+package com.anselumjuju.lib;
 
 import java.util.List;
 
 public class AllowedValueResolver {
 
-    public static String resolveFromAllowed(String input, List<String> allowedValues, double threshold) {
+    public static String resolveFromAllowed(String input, List<String> allowedValues) {
+        double threshold = 0.8;
+
         String inputNorm = normalize(input);
 
         String best = null;
@@ -19,10 +21,6 @@ public class AllowedValueResolver {
         }
 
         return bestScore >= threshold ? best : allowedValues.size() > 1 ? allowedValues.getFirst() : null;
-    }
-
-    public static String resolveFromAllowed(String input, List<String> allowedValues) {
-        return resolveFromAllowed(input, allowedValues, 0.8);
     }
 
     private static String normalize(String str) {

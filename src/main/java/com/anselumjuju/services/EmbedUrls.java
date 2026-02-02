@@ -1,27 +1,26 @@
-package com.anselumjuju.services.embed;
+package com.anselumjuju.services;
 
 import com.anselumjuju.lib.EnvConfig;
-import com.anselumjuju.stores.TokenStore;
-import com.anselumjuju.utils.AccessToken;
+import com.anselumjuju.lib.AccessToken;
+import com.anselumjuju.lib.Utils;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import jakarta.servlet.http.Part;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class CreateEmbedUrls {
+public class EmbedUrls {
 
-    public static List<String> createEmbedUrls(List<String> viewIds) {
+    public static List<String> createEmbedUrls(List<String> viewIds, String workspaceId) {
         String accessCode = AccessToken.getAccessToken();
         String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
         String analyticsUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
-        String workspaceId = TokenStore.getWorkspaceId();
 
         try (HttpClient client = HttpClient.newHttpClient()) {
             List<CompletableFuture<String>> futures = new ArrayList<>();
@@ -65,4 +64,5 @@ public class CreateEmbedUrls {
             return CompletableFuture.completedFuture(null);
         }
     }
+
 }
