@@ -20,17 +20,18 @@
       <img src="/frontend/public/assets/bg-desktop.png" class="bg-desktop-image" alt="" />
     </div>
 
-    <main class="flex-col-center">
-      <div id="upload-view" class="view flex-col-center">
+    <main id="analyze-container">
+      <!-- Upload View -->
+      <div id="upload-view" class="view">
         <div class="heading-container">
           <h1>Turn CSV Files Into <br /><span class="gradient-text">Interactive Dashboards</span></h1>
           <p>Upload your data and instantly generate insightful analytics dashboards — no setup required</p>
         </div>
 
-        <div class="upload-container flex-col-center">
-          <div id="drop-zone" class="upload-input-container flex-col-center">
+        <div class="container upload-container">
+          <button id="drop-zone" class="upload-input-container" aria-label="upload file">
             <!-- Before Upload -->
-            <div id="upload-empty" class="upload-empty flex-col-center">
+            <div id="upload-empty" class="upload-empty">
               <input type="file" accept=".csv" id="file-input" hidden />
               <h4><span id="browse-btn">Choose File</span> or Drag and Drop</h4>
               <p>Files are processed securely</p>
@@ -38,28 +39,29 @@
 
             <!-- After Upload -->
             <div id="upload-filled" class="upload-filled hidden">
-              <p id="uploaded-file-name">example.csv</p>
+              <p id="uploaded-file-name">file name</p>
             </div>
-          </div>
+          </button>
           <!-- Remove File -->
-          <div id="remove-file-btn" class="remove-file-button hidden">
+          <button id="remove-file-btn" class="remove-file-button hidden">
             <p>X</p>
-          </div>
+          </button>
           <!-- Error -->
-          <p class="file-upload-error" id="file-upload-error"></p>
+          <p class="error" id="file-upload-error"></p>
           <p class="upload-info">Supported Formats: CSV <br />Max file size: 20 MB</p>
         </div>
 
-        <button id="generate-btn">Generate Dashboard</button>
+        <button id="generate-btn" class="button btn-red">Generate Dashboard</button>
       </div>
 
-      <div id="progress-view" class="view flex-col-center hidden">
+      <!-- Progress View -->
+      <div id="progress-view" class="view hidden">
         <div class="heading-container">
           <h1><span class="gradient-text">Creating</span> your dashboard</h1>
           <p>This may take a moment. Please keep this tab open while we prepare your analytics.</p>
         </div>
 
-        <div class="progress-container flex-col-center">
+        <div class="container progress-container">
           <div class="progress-bar-bg">
             <div id="progress-bar-fill" class="progress-bar-fill"></div>
           </div>
@@ -67,25 +69,27 @@
         </div>
       </div>
 
-      <div id="dashboard-view" class="view flex-col-center hidden">
+      <!-- Dashboard View -->
+      <div id="dashboard-view" class="view hidden">
         <div class="heading-container">
           <h1><span class="gradient-text">Analytics</span> Dashboard</h1>
           <p>Explore insights, trends and reports generated from your data!</p>
         </div>
 
-        <div class="dashboard-container flex-col-center">
-          <div class="dashboard-controls flex-between">
+        <div class="container dashboard-container">
+          <div class="dashboard-controls">
             <h4>Data Insights</h4>
-            <div class="action-buttons">
-              <button id="regenerate-btn" class="btn-outline">Reset</button>
-              <button id="share-btn" class="btn-black">Share</button>
+            <div class="action-buttons" id="dashboard-controls">
+              <button id="reset-btn" class="button btn-outline">Reset</button>
+              <button id="share-btn" class="button btn-black">Share</button>
             </div>
           </div>
           <div id="iframe-container" class="iframe-container"></div>
         </div>
       </div>
 
-      <div id="error-view" class="view flex-col-center hidden">
+      <!-- Error View -->
+      <div id="error-view" class="view hidden">
         <div class="heading-container">
           <h1>
             <span class="gradient-text">Error</span>
@@ -93,7 +97,8 @@
           </h1>
           <p>We encountered an issue while processing your data.</p>
         </div>
-        <button id="retry-btn">Try Again</button>
+
+        <button id="retry-btn" class="button btn-retry">Try Again</button>
       </div>
     </main>
 

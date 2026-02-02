@@ -1,237 +1,275 @@
-import {analyzeFile, connectToWS, getEmbedUrls} from './server.js';
-
 const BASE_URL = 'http://localhost:5500/frontend/index.html';
+const SERVER_URL = 'http://localhost:8080/dashboard-generator-1.0-SNAPSHOT';
+const WS_URL = 'ws://localhost:8080/dashboard-generator-1.0-SNAPSHOT';
 
-const DOM = {
-  fileUpload: {
-    dropZone: document.getElementById('drop-zone'),
-    fileInput: document.getElementById('file-input'),
-    fileDisplayName: document.getElementById('uploaded-file-name'),
-    fileUploadError: document.getElementById('file-upload-error'),
-    beforeUpload: document.getElementById('upload-empty'),
-    afterUpload: document.getElementById('upload-filled'),
-  },
-  iframeContainer: document.getElementById('iframe-container'),
-  views: {
-    upload: document.getElementById('upload-view'),
-    progress: document.getElementById('progress-view'),
-    dashboard: document.getElementById('dashboard-view'),
-    error: document.getElementById('error-view'),
-  },
-  progress: {
-    bar: document.getElementById('progress-bar-fill'),
-    status: document.getElementById('progress-status'),
-  },
-  buttons: {
-    removeFile: document.getElementById('remove-file-btn'),
-    browse: document.getElementById('browse-btn'),
-    generate: document.getElementById('generate-btn'),
-    regenerate: document.getElementById('regenerate-btn'),
-    share: document.getElementById('share-btn'),
-    retry: document.getElementById('retry-btn'),
-  },
-};
+class DashboardGenerator {
+  constructor() {
+    this.analyzeContainer = document.getElementById('analyze-container');
+    this.dashboardControls = document.getElementById('dashboard-controls');
+    this.DOM = {
+      fileUpload: {
+        dropZone: this.analyzeContainer.querySelector('#drop-zone'),
+        fileInput: this.analyzeContainer.querySelector('#file-input'),
+        fileDisplayName: this.analyzeContainer.querySelector('#uploaded-file-name'),
+        fileUploadError: this.analyzeContainer.querySelector('#file-upload-error'),
+        beforeUpload: this.analyzeContainer.querySelector('#upload-empty'),
+        afterUpload: this.analyzeContainer.querySelector('#upload-filled'),
+      },
+      iframeContainer: this.analyzeContainer.querySelector('#iframe-container'),
+      views: {
+        upload: this.analyzeContainer.querySelector('#upload-view'),
+        progress: this.analyzeContainer.querySelector('#progress-view'),
+        dashboard: this.analyzeContainer.querySelector('#dashboard-view'),
+        error: this.analyzeContainer.querySelector('#error-view'),
+      },
+      progress: {
+        bar: this.analyzeContainer.querySelector('#progress-bar-fill'),
+        status: this.analyzeContainer.querySelector('#progress-status'),
+      },
+      buttons: {
+        removeFile: this.analyzeContainer.querySelector('#remove-file-btn'),
+        browse: this.analyzeContainer.querySelector('#browse-btn'),
+        generate: this.analyzeContainer.querySelector('#generate-btn'),
+        reset: this.dashboardControls.children[0],
+        share: this.dashboardControls.children[1],
+        retry: this.analyzeContainer.querySelector('#retry-btn'),
+      },
+    };
+    this.state = {
+      selectedFile: null,
+      isProcessing: false,
+      shareLink: null,
+    };
 
-const state = {
-  selectedFile: null,
-  isProcessing: false,
-  shareLink: null,
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  setupEventListeners();
-  updateButtons();
-  const key = getkey();
-  if (key != null) fetchDashboard(key);
-});
-
-function setupEventListeners() {
-  DOM.fileUpload.dropZone.addEventListener('click', () => DOM.fileUpload.fileInput.click());
-
-  // Drag and Drop
-  DOM.fileUpload.dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    DOM.fileUpload.dropZone.classList.add('drag-over');
-  });
-  DOM.fileUpload.dropZone.addEventListener('dragleave', () => {
-    DOM.fileUpload.dropZone.classList.remove('drag-over');
-  });
-  DOM.fileUpload.dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    DOM.fileUpload.dropZone.classList.remove('drag-over');
-    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-  });
-
-  DOM.fileUpload.fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) handleFile(e.target.files[0]);
-  });
-
-  DOM.buttons.retry.addEventListener('click', resetUI);
-  DOM.buttons.regenerate.addEventListener('click', resetUI);
-
-  DOM.buttons.removeFile.addEventListener('click', removeFile);
-
-  DOM.buttons.generate.addEventListener('click', generateDashboard);
-  DOM.buttons.share.addEventListener('click', shareDashboard);
-}
-
-function updateButtons() {
-  DOM.buttons.generate.disabled = state.isProcessing || !state.selectedFile;
-  DOM.buttons.regenerate.disabled = state.isProcessing;
-  DOM.buttons.share.disabled = state.isProcessing || !state.shareLink;
-}
-
-function handleFile(file) {
-  if (!validateFile(file)) return;
-  state.selectedFile = file;
-  DOM.fileUpload.fileDisplayName.innerText = file.name;
-  DOM.fileUpload.beforeUpload.classList.add('hidden');
-  DOM.fileUpload.afterUpload.classList.remove('hidden');
-  DOM.buttons.removeFile.classList.remove('hidden');
-  DOM.fileUpload.fileUploadError.innerText = '';
-  updateButtons();
-}
-
-function validateFile(file) {
-  if (!file) return false;
-  if (!file.name.endsWith('.csv')) {
-    DOM.fileUpload.fileUploadError.innerText = 'Only CSV files are allowed.';
-    return false;
+    this.init();
   }
 
-  if (file.size > 20 * 1024 * 1024) {
-    DOM.fileUpload.fileUploadError.innerText = 'File size exceeds the limit.';
-    return false;
+  // Init
+  init() {
+    this.setupEventListeners();
+    this.updateButtons();
+    const key = new URLSearchParams(window.location.search).get('key');
+    if (key != null) this.fetchDashboard(key);
   }
-  return true;
-}
 
-function removeFile() {
-  state.selectedFile = null;
-  DOM.fileUpload.fileDisplayName.innerText = '';
-  DOM.fileUpload.fileUploadError.innerText = '';
-  DOM.fileUpload.fileInput.value = '';
-  DOM.buttons.removeFile.classList.add('hidden');
-  DOM.fileUpload.beforeUpload.classList.remove('hidden');
-  DOM.fileUpload.afterUpload.classList.add('hidden');
-  updateButtons();
-}
+  // Event Listeners
+  setupEventListeners() {
+    this.DOM.fileUpload.dropZone.addEventListener('click', () => this.DOM.fileUpload.fileInput.click());
 
-// --- Core Logic ---
+    this.DOM.fileUpload.dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      this.DOM.fileUpload.dropZone.classList.add('drag-over');
+    });
+    this.DOM.fileUpload.dropZone.addEventListener('dragleave', () => {
+      this.DOM.fileUpload.dropZone.classList.remove('drag-over');
+    });
+    this.DOM.fileUpload.dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      this.DOM.fileUpload.dropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) this.handleFile(e.dataTransfer.files[0]);
+    });
 
-function resetUI() {
-  state.selectedFile = null;
-  state.isProcessing = false;
+    this.DOM.fileUpload.fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) this.handleFile(e.target.files[0]);
+    });
 
-  DOM.fileUpload.fileInput.value = '';
-  DOM.fileUpload.fileDisplayName.innerText = '';
-  DOM.fileUpload.fileUploadError.innerText = '';
+    this.DOM.buttons.retry.addEventListener('click', () => this.resetUI());
+    this.DOM.buttons.reset.addEventListener('click', () => this.resetUI());
 
-  DOM.fileUpload.beforeUpload.classList.remove('hidden');
-  DOM.fileUpload.afterUpload.classList.add('hidden');
-  DOM.buttons.removeFile.classList.add('hidden');
+    this.DOM.buttons.removeFile.addEventListener('click', () => this.removeFile());
 
-  DOM.progress.bar.style.width = '0%';
-  DOM.progress.status.innerText = 'Analyzing your Dashboard...';
+    this.DOM.buttons.generate.addEventListener('click', () => this.generateDashboard());
+    this.DOM.buttons.share.addEventListener('click', () => this.shareDashboard());
+  }
 
-  DOM.iframeContainer.innerHTML = '';
+  // Utilities
+  updateButtons() {
+    this.DOM.buttons.generate.disabled = this.state.isProcessing || !this.state.selectedFile;
+    this.DOM.buttons.reset.disabled = this.state.isProcessing;
+    this.DOM.buttons.share.disabled = this.state.isProcessing || !this.state.shareLink;
+  }
 
-  state.shareLink = null;
+  switchView(viewName) {
+    Object.values(this.DOM.views).forEach((view) => view.classList.add('hidden'));
+    this.DOM.views[viewName].classList.remove('hidden');
+  }
 
-  switchView('upload');
-  updateButtons();
-}
+  // Handling Files
+  handleFile(file) {
+    if (!this.validateFile(file)) return;
+    this.state.selectedFile = file;
+    this.DOM.fileUpload.fileDisplayName.innerText = file.name;
+    this.DOM.fileUpload.beforeUpload.classList.add('hidden');
+    this.DOM.fileUpload.afterUpload.classList.remove('hidden');
+    this.DOM.buttons.removeFile.classList.remove('hidden');
+    this.DOM.fileUpload.fileUploadError.innerText = '';
+    this.updateButtons();
+  }
 
-async function generateDashboard() {
-  if (!validateFile(state.selectedFile)) return;
-  const uniqueKey = generateUniqueKey();
-  state.isProcessing = true;
-  updateButtons();
-
-  switchView('progress');
-  try {
-    const socket = connectToWS(DOM.progress.bar, DOM.progress.status, uniqueKey);
-    const data = await analyzeFile(state.selectedFile, uniqueKey);
-    if (data.success == true) {
-      displayReports(data.urls);
-      state.shareLink = BASE_URL + '?key=' + data.key;
-      socket.close();
-    } else {
-      socket.close();
-      switchView('error');
+  validateFile(file) {
+    if (!file) return false;
+    if (!file.name.endsWith('.csv')) {
+      this.DOM.fileUpload.fileUploadError.innerText = 'Only CSV files are allowed.';
+      return false;
     }
-  } catch (err) {
-    console.error(err);
-    switchView('error');
-  } finally {
-    state.isProcessing = false;
-    updateButtons();
-  }
-}
 
-function switchView(viewName) {
-  Object.values(DOM.views).forEach((view) => view.classList.add('hidden'));
-  DOM.views[viewName].classList.remove('hidden');
-}
-
-async function shareDashboard() {
-  try {
-    if (!navigator.clipboard) throw new Error('Clipboard API unavailable');
-    await navigator.clipboard.writeText(state.shareLink);
-    DOM.buttons.share.innerText = 'Copied';
-    setTimeout(() => (DOM.buttons.share.innerText = 'Share'), 2000);
-  } catch {
-    console.error(err);
-  }
-}
-
-function displayReports(urls) {
-  DOM.iframeContainer.innerHTML = '';
-
-  urls.forEach((url) => {
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    iframe.className = 'dashboard-card';
-    iframe.loading = 'lazy';
-    DOM.iframeContainer.appendChild(iframe);
-  });
-
-  updateButtons();
-  switchView('dashboard');
-}
-
-function generateUniqueKey() {
-  const uniqueId = crypto.randomUUID().replaceAll('-', '');
-  return uniqueId;
-}
-
-function getkey() {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('key');
-}
-
-async function fetchDashboard(key) {
-  const uniqueKey = generateUniqueKey();
-  state.isProcessing = true;
-  updateButtons();
-
-  switchView('progress');
-  try {
-    const socket = connectToWS(DOM.progress.bar, DOM.progress.status, uniqueKey);
-    const data = await getEmbedUrls(key, uniqueKey);
-    if (data.success == true) {
-      displayReports(data.urls);
-      state.shareLink = BASE_URL + '?key=' + data.key;
-      socket.close();
-    } else {
-      socket.close();
-      switchView('error');
+    if (file.size > 20 * 1024 * 1024) {
+      this.DOM.fileUpload.fileUploadError.innerText = 'File size exceeds the limit.';
+      return false;
     }
-  } catch (err) {
-    console.error(err);
-    switchView('error');
-  } finally {
-    state.isProcessing = false;
-    updateButtons();
+    return true;
+  }
+
+  removeFile() {
+    this.state.selectedFile = null;
+    this.DOM.fileUpload.fileDisplayName.innerText = '';
+    this.DOM.fileUpload.fileUploadError.innerText = '';
+    this.DOM.fileUpload.fileInput.value = '';
+    this.DOM.buttons.removeFile.classList.add('hidden');
+    this.DOM.fileUpload.beforeUpload.classList.remove('hidden');
+    this.DOM.fileUpload.afterUpload.classList.add('hidden');
+    this.updateButtons();
+  }
+
+  // Core Logic
+  resetUI() {
+    this.state.selectedFile = null;
+    this.state.isProcessing = false;
+
+    this.DOM.fileUpload.fileInput.value = '';
+    this.DOM.fileUpload.fileDisplayName.innerText = '';
+    this.DOM.fileUpload.fileUploadError.innerText = '';
+
+    this.DOM.fileUpload.beforeUpload.classList.remove('hidden');
+    this.DOM.fileUpload.afterUpload.classList.add('hidden');
+    this.DOM.buttons.removeFile.classList.add('hidden');
+
+    this.DOM.progress.bar.style.width = '0%';
+    this.DOM.progress.status.innerText = 'Analyzing your Dashboard...';
+
+    this.DOM.iframeContainer.innerHTML = '';
+
+    this.state.shareLink = null;
+
+    this.switchView('upload');
+    this.updateButtons();
+  }
+
+  async generateDashboard() {
+    if (!this.validateFile(this.state.selectedFile)) return;
+    const uniqueKey = crypto.randomUUID().replaceAll('-', '');
+    this.state.isProcessing = true;
+    this.updateButtons();
+
+    this.switchView('progress');
+    try {
+      const socket = this.connectToWS(this.DOM.progress.bar, this.DOM.progress.status, uniqueKey);
+      const data = await this.analyzeFile(this.state.selectedFile, uniqueKey);
+      if (data.success == true) {
+        this.displayReports(data.urls);
+        this.state.shareLink = BASE_URL + '?key=' + data.key;
+        socket.close();
+      } else {
+        socket.close();
+        this.switchView('error');
+      }
+    } catch (err) {
+      console.error(err);
+      this.switchView('error');
+    } finally {
+      this.state.isProcessing = false;
+      this.updateButtons();
+    }
+  }
+
+  async shareDashboard() {
+    try {
+      if (!navigator.clipboard) throw new Error('Clipboard API unavailable');
+      await navigator.clipboard.writeText(this.state.shareLink);
+      this.DOM.buttons.share.innerText = 'Copied';
+      setTimeout(() => (this.DOM.buttons.share.innerText = 'Share'), 2000);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  displayReports(urls) {
+    this.DOM.iframeContainer.innerHTML = '';
+
+    urls.forEach((url) => {
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.className = 'dashboard-card';
+      iframe.loading = 'lazy';
+      this.DOM.iframeContainer.appendChild(iframe);
+    });
+
+    this.updateButtons();
+    this.switchView('dashboard');
+  }
+
+  async fetchDashboard(key) {
+    const uniqueKey = crypto.randomUUID().replaceAll('-', '');
+    this.state.isProcessing = true;
+    this.updateButtons();
+
+    this.switchView('progress');
+    try {
+      const socket = this.connectToWS(this.DOM.progress.bar, this.DOM.progress.status, uniqueKey);
+      const data = await this.getEmbedUrls(key, uniqueKey);
+      if (data.success == true) {
+        this.displayReports(data.urls);
+        this.state.shareLink = BASE_URL + '?key=' + data.key;
+        socket.close();
+      } else {
+        socket.close();
+        this.switchView('error');
+      }
+    } catch (err) {
+      console.error(err);
+      this.switchView('error');
+    } finally {
+      this.state.isProcessing = false;
+      this.updateButtons();
+    }
+  }
+
+  // Server Connections
+  async analyzeFile(file, key) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${SERVER_URL}/api/analyze?jobId=${key}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error('Upload failed');
+
+    const data = await response.json();
+    return data;
+  }
+
+  connectToWS(loader, status, key) {
+    const socket = new WebSocket(WS_URL + '/ws/progress/' + key);
+
+    socket.onmessage = function (event) {
+      const {progress, message} = JSON.parse(event.data);
+      loader.style.width = `${progress}%`;
+      status.innerText = message;
+    };
+
+    return socket;
+  }
+
+  async getEmbedUrls(key, jobId) {
+    const response = await fetch(`${SERVER_URL}/api/fetch/embedUrls?key=${key}&jobId=${jobId}`);
+
+    if (!response.ok) throw new Error('Failed to fetch embed URLs');
+
+    const data = await response.json();
+    return data;
   }
 }
+
+const dashboardGenerator = new DashboardGenerator();
