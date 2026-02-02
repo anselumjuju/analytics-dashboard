@@ -70,6 +70,7 @@ public class AnalyzeServlet extends HttpServlet {
             SendError.sendError(res, 400, "Failed to load configs");
             return;
         }
+        System.out.println(configs.size() + " Configs Generated");
 
 
         ProgressSocket.send(jobId, 65, "Designing your dashboard");
@@ -84,7 +85,7 @@ public class AnalyzeServlet extends HttpServlet {
 
         ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
         // 5. Creating Embed URLs
-        System.out.println("Creating Embed URLs");
+        System.out.println("Creating Embed URLs for " + viewIds.size() + " Reports");
         List<String> embedUrls = CreateEmbedUrls.createEmbedUrls(viewIds);
         if (embedUrls == null || embedUrls.isEmpty()) {
             SendError.sendError(res, 400, "Failed to create Embed URLs");

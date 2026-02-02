@@ -144,9 +144,10 @@ public class GetPrompt {
                         
                           STEP 9 — FILTERS STRATEGY:
                           - Add filters only when they improve decisions
-                          - Prefer Date, Region, Category, Segment, Team
-                          - Avoid over-filtering
+                          - Prefer Region, Category, Segment, Team
                           - Prefer "userFilters" for exploration
+                          - Avoid adding userFilters for column Type "Date"
+                          - Add more userFilters for user explorations
                         
                           STEP 10 — BUILD FINAL CONFIGS:
                           - Follow createReportSchema STRICTLY
@@ -166,6 +167,7 @@ public class GetPrompt {
                           - Do NOT repeat similar insights
                           - Output ONLY the final JSON config array
                           - Sort configs by priority and story flow
+                          - Don't use "userFilters" with column Type "Date"
                         
                           ====================================================================
                         

@@ -236,7 +236,12 @@ public class ValidateConfigs {
                     List<Map<String, String>> userFilters = (List<Map<String, String>>) config.get("userFilters");
 
                     int before = userFilters.size();
-                    userFilters.removeIf(f -> invalidOperations.contains(f.get("operation")));
+                    userFilters.removeIf(f -> {
+                        String columnType = (String) tableSchema.get(f.get("columnName"));
+                        if (columnType.equals("Date"))
+                            return invalidOperations.contains(f.get("operation"));
+                        return false;
+                    });
 
                     userFiltersRemoved += (before - userFilters.size());
                     config.put("userFilters", userFilters);
