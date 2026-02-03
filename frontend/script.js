@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5500/frontend';
+const BASE_URL = 'http://localhost:5500/frontend/index.html';
 const SERVER_URL = 'http://localhost:8080/dashboard-generator-1.0-SNAPSHOT';
 const WS_URL = 'ws://localhost:8080/dashboard-generator-1.0-SNAPSHOT';
 
@@ -196,6 +196,7 @@ class DashboardGenerator {
   }
 
   displayReports(urls) {
+    const reactFragment = document.createDocumentFragment();
     this.iFrameContainer.innerHTML = '';
 
     urls.forEach((url) => {
@@ -203,8 +204,15 @@ class DashboardGenerator {
       iframe.src = url;
       iframe.className = 'dashboard-card';
       iframe.loading = 'lazy';
-      this.iFrameContainer.appendChild(iframe);
+      reactFragment.appendChild(iframe);
     });
+
+    this.iFrameContainer.appendChild(reactFragment);
+
+    if (urls.length > 0 && urls.length % 2 != 0) {
+      const iframe = this.analyzeContainer.getElementsByTagName('iframe')[0];
+      iframe.style.gridColumn = 'span 2';
+    }
 
     this.updateButtons();
     this.switchView('dashboard');
