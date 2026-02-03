@@ -235,7 +235,7 @@ main {
 }
 
 .upload-input-container span {
-	color: var(--purple-500);
+	color: var(--purple-300);
 	text-decoration: underline;
 	text-underline-offset: 4px;
 }
