@@ -32,6 +32,7 @@
           <button id="drop-zone" class="upload-input-container" aria-label="upload file">
             <!-- Before Upload -->
             <div id="upload-empty" class="upload-empty">
+              <label for="file-input" hidden>Upload File</label>
               <input type="file" accept=".csv" id="file-input" hidden />
               <h4><span>Choose File</span> or Drag and Drop</h4>
               <p>Files are processed securely</p>
@@ -43,9 +44,7 @@
             </div>
           </button>
           <!-- Remove File -->
-          <button id="remove-file-btn" class="remove-file-button hidden">
-            <p>X</p>
-          </button>
+          <button id="remove-file-btn" class="remove-file-button hidden">X</button>
           <!-- Error -->
           <p class="error" id="file-upload-error"></p>
           <p class="upload-info">Supported Formats: CSV <br />Max file size: 20 MB</p>
