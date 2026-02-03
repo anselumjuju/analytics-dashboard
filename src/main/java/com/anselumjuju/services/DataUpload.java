@@ -47,10 +47,6 @@ public class DataUpload {
                     .build();
 
             HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
-                System.out.println("Data upload failed");
-                return null;
-            }
 
             Gson gson = new Gson();
             Map<String, Object> body = gson.fromJson(
@@ -58,11 +54,6 @@ public class DataUpload {
                     new TypeToken<Map<String, Object>>() {
                     }.getType()
             );
-
-            if (!"success".equals(body.get("status"))) {
-                System.out.println("Data upload failed");
-                return null;
-            }
 
             Map<String, Object> data = (Map<String, Object>) body.get("data");
 

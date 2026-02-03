@@ -36,7 +36,7 @@ public class GetEmbedLinks extends HttpServlet {
         }
 
         ProgressSocket.send(jobId, 76, "Fetching your dashboard...");
-        List<String> embedUrls = EmbedUrls.createEmbedUrls(viewIds, workspaceId);
+        List<String> embedUrls = EmbedUrls.getEmbedUrls(viewIds, workspaceId);
         if (embedUrls == null) {
             SendError.sendError(res, 400, "Failed to create Embed URLs");
             return;

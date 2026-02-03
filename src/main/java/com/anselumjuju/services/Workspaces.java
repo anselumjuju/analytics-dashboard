@@ -41,11 +41,6 @@ public class Workspaces {
 
             HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
 
-            if (res.statusCode() != 200) {
-                System.out.println("Workspace creation failed");
-                return null;
-            }
-
             Gson gson = new Gson();
             Map<String, Object> body = gson.fromJson(res.body(), new TypeToken<Map<String, Object>>() {
             }.getType());
