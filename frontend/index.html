@@ -22,17 +22,17 @@
 
     <main id="analyze-container">
       <!-- Upload View -->
-      <div id="upload-view" class="view">
+      <form id="upload-view" class="view">
         <div class="heading-container" onclick="console.log('dashbordGenerator: ', dashboardGenerator)">
           <h1>Turn CSV Files Into <br /><span class="gradient-text">Interactive Dashboards</span></h1>
           <p>Upload your data and instantly generate insightful analytics dashboards — no setup required</p>
         </div>
 
         <div class="container upload-container">
-          <button id="drop-zone" class="upload-input-container" aria-label="upload file">
+          <div id="drop-zone" class="upload-input-container" aria-label="upload file">
             <!-- Before Upload -->
             <div id="upload-empty" class="upload-empty">
-              <input type="file" accept=".csv" id="file-input" hidden />
+              <input type="file" accept=".csv" id="file-input" class="sr-only" aria-label="upload file" />
               <h4><span>Choose File</span> or Drag and Drop</h4>
               <p>Files are processed securely</p>
             </div>
@@ -41,16 +41,18 @@
             <div id="upload-filled" class="upload-filled hidden">
               <p id="uploaded-file-name">file name</p>
             </div>
-          </button>
+          </div>
           <!-- Remove File -->
-          <button id="remove-file-btn" class="remove-file-button hidden">X</button>
+          <button type="reset" id="remove-file-btn" class="remove-file-button hidden" aria-label="remove file">
+            X
+          </button>
           <!-- Error -->
           <p class="error" id="file-upload-error"></p>
           <p class="upload-info">Supported Formats: CSV <br />Max file size: 20 MB</p>
         </div>
 
-        <button id="generate-btn" class="button btn-red">Generate Dashboard</button>
-      </div>
+        <button type="submit" id="generate-btn" class="button btn-red">Generate Dashboard</button>
+      </form>
 
       <!-- Progress View -->
       <div id="progress-view" class="view hidden">

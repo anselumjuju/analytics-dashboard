@@ -85,7 +85,10 @@ class DashboardGenerator {
 
     this.removeFileButton.addEventListener('click', () => this.resetUI());
 
-    this.generateButton.addEventListener('click', () => this.generateDashboard());
+    this.uploadView.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.generateDashboard();
+    });
     this.shareButton.addEventListener('click', () => this.shareDashboard());
   }
 
