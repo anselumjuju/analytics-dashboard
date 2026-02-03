@@ -82,6 +82,15 @@ h1 {
 	color: var(--accent-red-500);
 }
 
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	opacity: 0;
+}
+
 /* Buttons */
 .button {
 	border-radius: 6px;
@@ -105,11 +114,11 @@ h1 {
 
 .btn-red {
 	background-color: var(--accent-red-500);
-	color: white;
+	color: var(--primary-foreground);
 }
 
 .btn-outline {
-	background: white;
+	background: var(--primary-foreground);
 	border: 1px solid var(--gray-200);
 	color: var(--primary-background);
 	padding: 10px 20px;
@@ -122,15 +131,15 @@ h1 {
 }
 
 .btn-black {
-	background: black;
-	border: 1px solid black;
-	color: white;
+	background: var(--primary-background);
+	border: 1px solid var(--primary-background);
+	color: var(--primary-foreground);
 	padding: 10px 20px;
 }
 
 .btn-black:hover,
 .btn-black:focus {
-	background: black;
+	background: var(--primary-background);
 	border: 1px solid var(--gray-200);
 }
 
@@ -203,10 +212,14 @@ main {
 	background-color: var(--glass-bg);
 	border-radius: 20px;
 	border: 1px dashed var(--glass-border);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	gap: 12px;
 	cursor: pointer;
 	transition: all 0.3s ease;
-	color: white;
+	color: var(--primary-foreground);
 }
 
 .upload-input-container:hover,
@@ -251,7 +264,7 @@ main {
 	width: 30px;
 	height: 30px;
 	background-color: var(--glass-bg);
-	color: white;
+	color: var(--primary-foreground);
 	border-radius: 50%;
 	cursor: pointer;
 	display: flex;
@@ -293,7 +306,7 @@ main {
 /* Dashboard View */
 .dashboard-container {
 	width: 100%;
-	background-color: white;
+	background-color: var(--primary-foreground);
 	border-radius: 16px;
 	padding: 30px;
 	color: var(--primary-foreground);
@@ -332,7 +345,7 @@ main {
 	height: 550px;
 	border-radius: 12px;
 	border: 1px solid var(--gray-200);
-	background: white;
+	background: var(--primary-foreground);
 	box-shadow: 0 4px 6px -1px var(--gray-200);
 }
 

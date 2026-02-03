@@ -23,7 +23,7 @@
     <main id="analyze-container">
       <!-- Upload View -->
       <div id="upload-view" class="view">
-        <div class="heading-container">
+        <div class="heading-container" onclick="console.log('dashbordGenerator: ', dashboardGenerator)">
           <h1>Turn CSV Files Into <br /><span class="gradient-text">Interactive Dashboards</span></h1>
           <p>Upload your data and instantly generate insightful analytics dashboards — no setup required</p>
         </div>
@@ -33,7 +33,7 @@
             <!-- Before Upload -->
             <div id="upload-empty" class="upload-empty">
               <input type="file" accept=".csv" id="file-input" hidden />
-              <h4><span id="browse-btn">Choose File</span> or Drag and Drop</h4>
+              <h4><span>Choose File</span> or Drag and Drop</h4>
               <p>Files are processed securely</p>
             </div>
 
