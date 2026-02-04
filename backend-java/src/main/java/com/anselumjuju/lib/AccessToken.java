@@ -1,0 +1,16 @@
+package com.anselumjuju.lib;
+
+import com.anselumjuju.services.GenerateAccessToken;
+import com.anselumjuju.stores.TokenStore;
+
+public class AccessToken {
+    public static synchronized String getAccessToken() {
+        String accessToken = TokenStore.getAccessToken();
+        String expiryTime = TokenStore.getExpiryTime();
+
+        if (accessToken == null || TokenStore.isTokenExpired(expiryTime))
+            accessToken = GenerateAccessToken.generateAccessToken();
+
+        return accessToken;
+    }
+}
