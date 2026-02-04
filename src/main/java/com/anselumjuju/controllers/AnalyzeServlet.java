@@ -77,6 +77,8 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
+        System.out.println("viewIds: " + viewIds);
+
         ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
         // 5. Creating Embed URLs
         System.out.println("Creating Embed URLs for " + viewIds.size() + " Reports");
@@ -87,6 +89,7 @@ public class AnalyzeServlet extends HttpServlet {
         }
 
         System.out.println(embedUrls.size() + " Reports Created");
+        System.out.println("embedURLS: " + embedUrls);
 
         ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
         // 6. Success Response

@@ -60,8 +60,7 @@ public class Reports {
 
             return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                     .thenApply(res -> {
-                        if (res.statusCode() != 200) return null;
-
+                        System.out.println(res.body());
                         Map<String, Object> body = new Gson().fromJson(res.body(), new TypeToken<Map<String, Object>>() {
                         }.getType());
                         Map<String, Object> data = (Map<String, Object>) body.get("data");
@@ -70,6 +69,7 @@ public class Reports {
                     })
                     .exceptionally(ex -> null);
         } catch (Exception e) {
+            System.out.println("Failed to create a report " + e.getMessage());
             return CompletableFuture.completedFuture(null);
         }
     }

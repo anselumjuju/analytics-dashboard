@@ -28,6 +28,7 @@ public class DataUpload {
         params.addProperty("fileType", "csv");
         params.addProperty("autoIdentify", "true");
         params.addProperty("onError", "skiprow");
+        params.addProperty("thousandSeparator", 0);
 
         String url = String.format(
                 "%s/restapi/v2/workspaces/%s/data?CONFIG=%s",
