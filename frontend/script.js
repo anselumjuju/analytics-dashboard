@@ -1,5 +1,5 @@
 const BASE_URL = 'http://localhost:5500/frontend/index.html';
-const SERVER_URL = 'http://localhost:8080/dashboard-generator-1.0-SNAPSHOT';
+const SERVER_URL = 'http://localhost:8080/dashboard-generator-1.1';
 const WS_URL = 'ws://localhost:8080/dashboard-generator-1.0-SNAPSHOT';
 
 class DashboardGenerator {
