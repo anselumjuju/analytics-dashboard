@@ -171,7 +171,7 @@ class DashboardGenerator {
       const socket = this.connectToWS(this.progressBar, this.progressStatus, uniqueKey);
       const data = await this.analyzeFile(this.state.selectedFile, uniqueKey);
       if (data.success == true) {
-        this.displayReports(data.urls);
+        this.displayReportsJsApi(data.urls);
         this.state.shareLink = BASE_URL + '?key=' + data.key;
         socket.close();
       } else {
@@ -221,6 +221,107 @@ class DashboardGenerator {
     this.switchView('dashboard');
   }
 
+  displayReportsJsApi(urls) {
+    const reactFragment = document.createDocumentFragment();
+
+    urls.forEach((url) => {
+      const outerDiv = document.createElement('div');
+      outerDiv.className = 'report-card';
+      const reportDiv = document.createElement('div');
+      const options = {
+        width: '100%',
+        height: window.innerWidth < 767 ? '400px' : '550px',
+      };
+      const report = new ZAnalyticsLib(reportDiv, url, options);
+      report.createViz();
+
+      const fullScreenBtn = document.createElement('button');
+      fullScreenBtn.innerText = 'Full Screen';
+      fullScreenBtn.addEventListener('click', () => report.toggleFullScreen());
+
+      const newWindowButton = document.createElement('button');
+      newWindowButton.innerText = 'New Window';
+      newWindowButton.addEventListener('click', () => report.openInNewTab());
+
+      const toggleViewButton = document.createElement('button');
+      toggleViewButton.innerText = 'Toggle View';
+      toggleViewButton.dataset.toggle = 'show';
+      toggleViewButton.addEventListener('click', () => {
+        if (toggleViewButton.dataset.toggle == 'show') {
+          toggleViewButton.dataset.toggle = 'hide';
+          report.hide();
+        } else {
+          toggleViewButton.dataset.toggle = 'show';
+          report.show();
+        }
+      });
+
+      const insightsButton = document.createElement('button');
+      insightsButton.innerText = 'Insights';
+      insightsButton.addEventListener('click', () => {
+        report.showInsights();
+      });
+
+      const vudButton = document.createElement('button');
+      vudButton.innerText = 'VUD';
+      vudButton.addEventListener('click', () => {
+        console.log('showing VUD');
+        report.showVUD();
+      });
+
+      const exportButton = document.createElement('button');
+      exportButton.innerText = 'Export';
+      exportButton.addEventListener('click', () => {
+        console.log('exporting PDF');
+        report.exportAsPDF();
+      });
+
+      const sortSelector = document.createElement('select');
+      const sortOptions = [
+        {option: 'XAxis Asc', value: 'xaxis-asc'},
+        {option: 'XAxis Desc', value: 'xaxis-desc'},
+        {option: 'YAxis Asc', value: 'yaxis-asc'},
+        {option: 'YAxis Desc', value: 'yaxis-desc'},
+      ];
+      sortOptions.forEach((option) => {
+        const optionEl = document.createElement('option');
+        optionEl.value = option.value;
+        optionEl.innerText = option.option;
+        sortSelector.appendChild(optionEl);
+      });
+      sortSelector.title = 'Sort By';
+      sortSelector.addEventListener('change', (e) => {
+        const selectedValue = e.target.value;
+        const axis = selectedValue.includes('xaxis') ? 'xaxis' : 'yaxis';
+        const order = selectedValue.includes('asc') ? 'asc' : 'desc';
+        report.sortView(axis.toUpperCase(), order, 1);
+      });
+
+      const reportControls = document.createElement('div');
+      reportControls.appendChild(sortSelector);
+      reportControls.appendChild(newWindowButton);
+      reportControls.appendChild(toggleViewButton);
+      reportControls.appendChild(insightsButton);
+      reportControls.appendChild(vudButton);
+      reportControls.appendChild(fullScreenBtn);
+      reportControls.appendChild(exportButton);
+
+      outerDiv.appendChild(reportControls);
+      outerDiv.appendChild(reportDiv);
+      reactFragment.appendChild(outerDiv);
+    });
+
+    this.iFrameContainer.appendChild(reactFragment);
+    this.updateButtons();
+
+    if (urls.length > 0 && urls.length % 2 != 0) {
+      const comp = this.analyzeContainer.getElementsByClassName('dashboard-card')[0];
+      comp.style.gridColumn = 'span 2';
+    }
+
+    this.switchView('dashboard');
+  }
+
   async fetchDashboard(key) {
     const uniqueKey = crypto.randomUUID().replaceAll('-', '');
     this.state.isProcessing = true;
@@ -231,7 +332,11 @@ class DashboardGenerator {
       const socket = this.connectToWS(this.progressBar, this.progressStatus, uniqueKey);
       const data = await this.getEmbedUrls(key, uniqueKey);
       if (data.success == true) {
-        this.displayReports(data.urls);
+        if (data.urls.length == 0) {
+          this.switchView('error');
+          return;
+        }
+        this.displayReportsJsApi(data.urls);
         this.state.shareLink = BASE_URL + '?key=' + data.key;
         socket.close();
       } else {
