@@ -67,7 +67,6 @@ public class AnalyzeServlet extends HttpServlet {
         }
         System.out.println(configs.size() + " Configs Generated");
 
-
         ProgressSocket.send(jobId, 65, "Designing your dashboard");
         // 4. Creating Reports
         System.out.println("Creating Reports");
@@ -76,8 +75,6 @@ public class AnalyzeServlet extends HttpServlet {
             SendError.sendError(res, 400, "Failed to create Reports");
             return;
         }
-
-        System.out.println("viewIds: " + viewIds);
 
         ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
         // 5. Creating Embed URLs
@@ -89,7 +86,6 @@ public class AnalyzeServlet extends HttpServlet {
         }
 
         System.out.println(embedUrls.size() + " Reports Created");
-        System.out.println("embedURLS: " + embedUrls);
 
         ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
         // 6. Success Response

@@ -58,6 +58,11 @@ public class DataUpload {
 
             Map<String, Object> data = (Map<String, Object>) body.get("data");
 
+            if (!body.get("status").equals("success")) {
+                System.out.println("Error uploading file: " + data.get("errorMessage"));
+                return null;
+            }
+
             Map<String, Object> result = new HashMap<>();
             result.put("status", "success");
             result.put("tableName", tableName);
@@ -65,7 +70,7 @@ public class DataUpload {
 
             return result;
         } catch (Exception e) {
-            System.out.println("Error uploading file " + e.getMessage());
+            System.out.println("Error uploading file: " + e.getMessage());
             return null;
         }
     }
@@ -83,6 +88,5 @@ public class DataUpload {
 
         return HttpRequest.BodyPublishers.ofByteArrays(body);
     }
-
 
 }

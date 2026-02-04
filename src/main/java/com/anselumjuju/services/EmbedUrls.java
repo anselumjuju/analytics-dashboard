@@ -34,8 +34,6 @@ public class EmbedUrls {
                 if (future.join() != null)
                     embedUrls.add(future.join());
 
-            System.out.println(embedUrls);
-
             return embedUrls;
         } catch (Exception e) {
             System.out.println("Failed to create Embed Urls " + e.getMessage());
@@ -44,8 +42,18 @@ public class EmbedUrls {
     }
 
     private static CompletableFuture<String> createEmbedUrl(HttpClient client, String accessCode, String orgId, String analyticsUrl, String workspaceId, String viewId) {
+        Map<String, Object> params = new HashMap<>();
+        Map<String, Boolean> persmissions = new HashMap<>();
+        persmissions.put("export", true);
+        persmissions.put("vud", true);
+        persmissions.put("drillDown", true);
+        persmissions.put("insight", true );
+        params.put("permissions", persmissions);
+
+        String config = Utils.encode(new Gson().toJson(params));
+
         try {
-            String url = analyticsUrl + "/restapi/v2/workspaces/" + workspaceId + "/views/" + viewId + "/publish/privatelink";
+            String url = analyticsUrl + "/restapi/v2/workspaces/" + workspaceId + "/views/" + viewId + "/publish/privatelink?CONFIG=" + config;
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(new URI(url))
                     .header("Authorization", "Zoho-oauthtoken " + accessCode)
@@ -55,66 +63,18 @@ public class EmbedUrls {
 
             return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                     .thenApply(res -> {
-                        System.out.println(res.body());
                         Map<String, Object> body = new Gson().fromJson(res.body(), new TypeToken<Map<String, Object>>() {
                         }.getType());
                         Map<String, Object> data = (Map<String, Object>) body.get("data");
+
+                        if (!body.get("status").equals("success")) {
+                            System.out.println("Failed to create an Embed Url: " + data.get("errorMessage"));
+                            return null;
+                        }
                         return data.get("privateUrl").toString();
                     })
                     .exceptionally(ex -> null);
         } catch (Exception e) {
-            System.out.println("Failed to create an Embed Url " + e.getMessage());
-            return CompletableFuture.completedFuture(null);
-        }
-    }
-
-    public static List<String> getEmbedUrls(List<String> viewIds, String workspaceId) {
-        String accessCode = AccessToken.getAccessToken();
-        String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
-        String analyticsUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
-
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            List<CompletableFuture<String>> futures = new ArrayList<>();
-
-            for (String viewId : viewIds)
-                if (viewId != null)
-                    futures.add(getEmbedUrl(client, accessCode, orgId, analyticsUrl, workspaceId, viewId));
-
-            List<String> embedUrls = new ArrayList<>();
-            for (CompletableFuture<String> future : futures)
-                if (future.join() != null)
-                    embedUrls.add(future.join());
-
-            System.out.println(embedUrls);
-
-            return embedUrls;
-        } catch (Exception e) {
-            System.out.println("Failed to create Embed Urls " + e.getMessage());
-            return null;
-        }
-    }
-
-    private static CompletableFuture<String> getEmbedUrl(HttpClient client, String accessCode, String orgId, String analyticsUrl, String workspaceId, String viewId) {
-        try {
-            String url = analyticsUrl + "/restapi/v2/workspaces/" + workspaceId + "/views/" + viewId + "/publish/privatelink";
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(new URI(url))
-                    .header("Authorization", "Zoho-oauthtoken " + accessCode)
-                    .header("ZANALYTICS-ORGID", orgId)
-                    .GET()
-                    .build();
-
-            return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(res -> {
-                        if (res.statusCode() != 200) return null;
-                        Map<String, Object> body = new Gson().fromJson(res.body(), new TypeToken<Map<String, Object>>() {
-                        }.getType());
-                        Map<String, Object> data = (Map<String, Object>) body.get("data");
-                        return data.get("privateUrl").toString();
-                    })
-                    .exceptionally(ex -> null);
-        } catch (Exception e) {
-            System.out.println("Failed to get an Embed Url " + e.getMessage());
             return CompletableFuture.completedFuture(null);
         }
     }

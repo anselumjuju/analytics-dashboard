@@ -46,11 +46,15 @@ public class Workspaces {
             }.getType());
 
             Map<String, Object> data = (Map<String, Object>) body.get("data");
-            String workspaceId = (String) data.get("workspaceId");
 
-            return workspaceId;
+            if (!body.get("status").equals("success")) {
+                System.out.println("Error creating workspace: " + data.get("errorMessage"));
+                return null;
+            }
+
+            return (String) data.get("workspaceId");
         } catch (Exception e) {
-            System.out.println("Error creating workspace " + e.getMessage());
+            System.out.println("Error creating workspace: " + e.getMessage());
             return null;
         }
     }
@@ -79,6 +83,12 @@ public class Workspaces {
             );
 
             Map<String, Object> data = (Map<String, Object>) body.get("data");
+
+            if (!body.get("status").equals("success")) {
+                System.out.println("Error fetching workspaces: " + data.get("errorMessage"));
+                return null;
+            }
+
             List<Map<String, Object>> ownedWorkspaces = (List<Map<String, Object>>) data.get("ownedWorkspaces");
 
             List<String> workspaceIds = new ArrayList<>();
@@ -91,7 +101,7 @@ public class Workspaces {
 
             return workspaceIds;
         } catch (Exception e) {
-            System.out.println("Error getting all owned workspaces " + e.getMessage());
+            System.out.println("Error fetching workspaces: " + e.getMessage());
             return null;
         }
     }
@@ -115,7 +125,7 @@ public class Workspaces {
 
             return deletedCount;
         } catch (Exception e) {
-            System.out.println("Error deleting workspaces " + e.getMessage());
+            System.out.println("Error deleting workspaces: " + e.getMessage());
             return 0;
         }
     }
@@ -131,7 +141,7 @@ public class Workspaces {
                 .build();
 
         return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                .thenApply(res -> res.statusCode() >= 200 && res.statusCode() < 300)
+                .thenApply(res -> res.statusCode() == 200)
                 .exceptionally(ex -> {
                     System.err.println("Failed to delete workspace " + workspaceId + ": " + ex.getMessage());
                     return false;

@@ -44,7 +44,7 @@ public class Reports {
 
             return viewIds;
         } catch (Exception e) {
-            System.out.println("Failed to create reports " + e.getMessage());
+            System.out.println("Failed to create reports: " + e.getMessage());
             return null;
         }
     }
@@ -60,16 +60,18 @@ public class Reports {
 
             return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                     .thenApply(res -> {
-                        System.out.println(res.body());
                         Map<String, Object> body = new Gson().fromJson(res.body(), new TypeToken<Map<String, Object>>() {
                         }.getType());
                         Map<String, Object> data = (Map<String, Object>) body.get("data");
 
+                        if (!body.get("status").equals("success")) {
+                            System.out.println("Failed to create report: " + data.get("errorMessage"));
+                            return null;
+                        }
                         return data.get("viewId").toString();
                     })
                     .exceptionally(ex -> null);
         } catch (Exception e) {
-            System.out.println("Failed to create a report " + e.getMessage());
             return CompletableFuture.completedFuture(null);
         }
     }
