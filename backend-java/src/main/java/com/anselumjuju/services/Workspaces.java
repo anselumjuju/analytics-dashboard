@@ -141,7 +141,7 @@ public class Workspaces {
                 .build();
 
         return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                .thenApply(res -> res.statusCode() == 200)
+                .thenApply(res -> res.statusCode() == 204)
                 .exceptionally(ex -> {
                     System.err.println("Failed to delete workspace " + workspaceId + ": " + ex.getMessage());
                     return false;
