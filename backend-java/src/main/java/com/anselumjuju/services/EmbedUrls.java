@@ -4,9 +4,7 @@ import com.anselumjuju.lib.EnvConfig;
 import com.anselumjuju.lib.AccessToken;
 import com.anselumjuju.lib.Utils;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import jakarta.servlet.http.Part;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -34,6 +32,8 @@ public class EmbedUrls {
                 if (future.join() != null)
                     embedUrls.add(future.join());
 
+            embedUrls = embedUrls.stream().filter(e -> e != null).toList();
+
             return embedUrls;
         } catch (Exception e) {
             System.out.println("Failed to create Embed Urls " + e.getMessage());
@@ -47,7 +47,7 @@ public class EmbedUrls {
         persmissions.put("export", true);
         persmissions.put("vud", true);
         persmissions.put("drillDown", true);
-        persmissions.put("insight", true );
+        persmissions.put("insight", true);
         params.put("permissions", persmissions);
 
         String config = Utils.encode(new Gson().toJson(params));
