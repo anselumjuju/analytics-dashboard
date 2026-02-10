@@ -171,7 +171,7 @@ class DashboardGenerator {
       const socket = this.connectToWS(this.progressBar, this.progressStatus, uniqueKey);
       const data = await this.analyzeFile(this.state.selectedFile, uniqueKey);
       if (data.success == true) {
-        this.displayReportsJsApi(data.urls);
+        this.displayReportsJsApi(data.urls, data.configs);
         this.state.shareLink = BASE_URL + '?key=' + data.key;
         socket.close();
       } else {
@@ -198,33 +198,16 @@ class DashboardGenerator {
     }
   }
 
-  displayReports(urls) {
+  displayReportsJsApi(urls, configs) {
     const reactFragment = document.createDocumentFragment();
-    this.iFrameContainer.innerHTML = '';
 
-    urls.forEach((url) => {
-      const iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.className = 'dashboard-card';
-      iframe.loading = 'lazy';
-      reactFragment.appendChild(iframe);
-    });
-
-    this.iFrameContainer.appendChild(reactFragment);
-
-    if (urls.length > 0 && urls.length % 2 != 0) {
-      const iframe = this.analyzeContainer.getElementsByTagName('iframe')[0];
-      iframe.style.gridColumn = 'span 2';
+    if (configs == null) {
+      configs = [];
+      urls.forEach((u) => configs.push({embedUrl: u}));
     }
 
-    this.updateButtons();
-    this.switchView('dashboard');
-  }
-
-  displayReportsJsApi(urls) {
-    const reactFragment = document.createDocumentFragment();
-
-    urls.forEach((url) => {
+    configs.forEach((config) => {
+      const url = config.embedUrl;
       const outerDiv = document.createElement('div');
       outerDiv.className = 'report-card';
       const reportDiv = document.createElement('div');
@@ -277,28 +260,63 @@ class DashboardGenerator {
       });
 
       const sortSelector = document.createElement('select');
-      const sortOptions = [
-        {option: 'XAxis Asc', value: 'xaxis-asc'},
-        {option: 'XAxis Desc', value: 'xaxis-desc'},
-        {option: 'YAxis Asc', value: 'yaxis-asc'},
-        {option: 'YAxis Desc', value: 'yaxis-desc'},
-      ];
-      sortOptions.forEach((option) => {
-        const optionEl = document.createElement('option');
-        optionEl.value = option.value;
-        optionEl.innerText = option.option;
-        sortSelector.appendChild(optionEl);
-      });
-      sortSelector.title = 'Sort By';
-      sortSelector.addEventListener('change', (e) => {
-        const selectedValue = e.target.value;
-        const axis = selectedValue.includes('xaxis') ? 'xaxis' : 'yaxis';
-        const order = selectedValue.includes('asc') ? 'asc' : 'desc';
-        report.sortView(axis.toUpperCase(), order, 1);
-      });
+      if ('axisColumns' in config) {
+        const axisColumns = config.axisColumns;
+        const sortAxis = {
+          xAxis: axisColumns.filter((axis) => axis.type === 'xAxis'),
+          yAxis: axisColumns.filter((axis) => axis.type === 'yAxis'),
+        };
+        // OptGroup xAxis
+        if (sortAxis.xAxis.length > 0) {
+          const optGroupXAxis = document.createElement('optgroup');
+          optGroupXAxis.label = 'XAxis';
+          sortAxis.xAxis.forEach((axis, i) => {
+            // Ascending
+            const optionElAsc = document.createElement('option');
+            optionElAsc.value = 'xaxis-' + 'asc' + '-' + ++i;
+            optionElAsc.innerText = axis.columnName + ' - Asc';
+            // Descending
+            const optionElDesc = document.createElement('option');
+            optionElDesc.value = 'xaxis-' + 'desc' + '-' + ++i;
+            optionElDesc.innerText = axis.columnName + ' - Desc';
+            optGroupXAxis.appendChild(optionElAsc);
+            optGroupXAxis.appendChild(optionElDesc);
+          });
+          sortSelector.appendChild(optGroupXAxis);
+        }
+        // OptGroup yAxis
+        if (sortAxis.yAxis.length > 0) {
+          const optGroupYAxis = document.createElement('optgroup');
+          optGroupYAxis.label = 'YAxis';
+          sortAxis.yAxis.forEach((axis, i) => {
+            // Ascending
+            const optionElAsc = document.createElement('option');
+            optionElAsc.value = 'yaxis-asc-' + ++i;
+            optionElAsc.innerText = axis.columnName + ' - Asc';
+            // Descending
+            const optionElDesc = document.createElement('option');
+            optionElDesc.value = 'yaxis-desc-' + ++i;
+            optionElDesc.innerText = axis.columnName + ' - Desc';
+            optGroupYAxis.appendChild(optionElAsc);
+            optGroupYAxis.appendChild(optionElDesc);
+          });
+          sortSelector.appendChild(optGroupYAxis);
+        }
+
+        sortSelector.title = 'Sort By';
+        sortSelector.addEventListener('change', (e) => {
+          const selectedValue = e.target.value;
+          const axis = selectedValue.includes('xaxis') ? 'xaxis' : 'yaxis';
+          const order = selectedValue.includes('asc') ? 'asc' : 'desc';
+          const index = selectedValue.split('-')[2];
+          report.sortView(axis.toUpperCase(), order, index);
+        });
+      }
 
       const reportControls = document.createElement('div');
-      reportControls.appendChild(sortSelector);
+      if ('axisColumns' in config) {
+        reportControls.appendChild(sortSelector);
+      }
       reportControls.appendChild(newWindowButton);
       reportControls.appendChild(toggleViewButton);
       reportControls.appendChild(insightsButton);

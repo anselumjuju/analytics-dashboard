@@ -32,8 +32,6 @@ public class EmbedUrls {
                 if (future.join() != null)
                     embedUrls.add(future.join());
 
-            embedUrls = embedUrls.stream().filter(e -> e != null).toList();
-
             return embedUrls;
         } catch (Exception e) {
             System.out.println("Failed to create Embed Urls " + e.getMessage());

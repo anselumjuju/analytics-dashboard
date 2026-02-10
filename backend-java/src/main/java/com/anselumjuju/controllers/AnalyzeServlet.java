@@ -85,6 +85,17 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
+        if (embedUrls.size() == configs.size()) {
+            for (int i = 0; i < embedUrls.size(); i++)
+                configs.get(i).put("embedUrl", embedUrls.get(i));
+            for(int i = 0; i < embedUrls.size(); i++){
+                if(embedUrls.get(i) == null) {
+                    configs.remove(i);
+                    embedUrls.remove(i);
+                }
+            }
+        }
+
         System.out.println(embedUrls.size() + " Reports Created");
 
         ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
@@ -94,6 +105,8 @@ public class AnalyzeServlet extends HttpServlet {
         result.put("message", "Analysis completed");
         result.put("key", Utils.encodeLinks(viewIds, workspaceId));
         result.put("urls", embedUrls);
+        if(embedUrls.size() == configs.size())
+            result.put("configs", configs);
 
         res.setStatus(200);
         res.getWriter().write(gson.toJson(result));
