@@ -17,12 +17,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class Reports {
     public static List<String> createReports(List<Map<String, Object>> configs, String workspaceId) {
-
         String baseUrl = EnvConfig.ZOHO_AUTH_ANALYTICS_URL;
         String accessCode = AccessToken.getAccessToken();
         String orgId = EnvConfig.ZOHO_ANALYTICS_ORG_ID;
-
-        Gson gson = new Gson();
 
         List<String> viewIds = new ArrayList<>();
         List<CompletableFuture<String>> futures = new ArrayList<>();
@@ -32,7 +29,7 @@ public class Reports {
         try (HttpClient client = HttpClient.newHttpClient()) {
             List<String> params = new ArrayList<>();
             for (Map<String, Object> config : configs)
-                params.add(Utils.encode(gson.toJson(config)));
+                params.add(Utils.encode(new Gson().toJson(config)));
 
             for (String param : params)
                 futures.add(createReport(client, accessCode, orgId, url, param));
@@ -40,7 +37,7 @@ public class Reports {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
             for (CompletableFuture<String> future : futures)
-                if (future.join() != null) viewIds.add(future.join());
+                viewIds.add(future.join());
 
             return viewIds;
         } catch (Exception e) {

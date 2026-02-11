@@ -14,7 +14,9 @@ public class SendError {
         res.getWriter().write(gson.toJson(Map.of(
                 "success", false,
                 "status", status,
-                "message", message
+                "data", Map.of(
+                        "message", message
+                )
         )));
     }
 }

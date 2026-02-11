@@ -43,13 +43,16 @@ public class GetEmbedLinks extends HttpServlet {
         }
 
         ProgressSocket.send(jobId, 100, "Your dashboard is ready!");
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("message", "Analysis completed");
-        result.put("key", key);
-        result.put("urls", embedUrls);
-
         res.setStatus(200);
-        res.getWriter().write(gson.toJson(result));
+        res.getWriter().write(gson.toJson(Map.of(
+                "success", true,
+                "status", 200,
+                "data", Map.of(
+                        "message", "Analysis completed",
+                        "key", key,
+                        "reportHeading", "Data Insights",
+                        "urls", embedUrls
+                )
+        )));
     }
 }

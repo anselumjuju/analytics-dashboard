@@ -27,7 +27,6 @@ public class AnalyzeServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
         System.out.println("\n\n\n\n\nAnalyzing...");
-        Part filePart = req.getPart("file");
 
         String jobId = req.getParameter("jobId");
         if (jobId == null || jobId.isBlank()) {
@@ -35,14 +34,15 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
+        Part filePart = req.getPart("file");
         if (filePart == null) {
             SendError.sendError(res, 400, "No file uploaded");
             return;
         }
 
-        ProgressSocket.send(jobId, 10, "Getting things ready...");
         // 1. Creating Workspace
         System.out.println("Creating workspace");
+        ProgressSocket.send(jobId, 10, "Getting things ready...");
         String workspaceId = Workspaces.createWorkspace();
         if (workspaceId == null) {
             SendError.sendError(res, 500, "Failed to create workspace");
@@ -57,58 +57,68 @@ public class AnalyzeServlet extends HttpServlet {
             return;
         }
 
-        ProgressSocket.send(jobId, 20, "Analyzing your report...");
         // 3. Generate Configs from Gemini
         System.out.println("Generating configs from Gemini");
-        List<Map<String, Object>> configs = GetConfig.getConfig(uploadResponse, jobId);
+        ProgressSocket.send(jobId, 20, "Analyzing your report...");
+        Map<String, Object> geminiResponse = GetConfig.getConfig(uploadResponse, jobId);
+        String reportHeading = (String) geminiResponse.get("reportHeading");
+        List<Map<String, Object>> configs = (List<Map<String, Object>>) geminiResponse.get("configs");
         if (configs == null) {
             SendError.sendError(res, 400, "Failed to load configs");
             return;
         }
         System.out.println(configs.size() + " Configs Generated");
 
-        ProgressSocket.send(jobId, 65, "Designing your dashboard");
         // 4. Creating Reports
         System.out.println("Creating Reports");
+        ProgressSocket.send(jobId, 65, "Designing your dashboard");
         List<String> viewIds = Reports.createReports(configs, workspaceId);
+        int viewIdsSize = viewIds == null ? 0 : viewIds.size();
+        for (int i = viewIdsSize - 1; i >= 0; i--) {
+            if (viewIds.get(i) == null) {
+                configs.remove(i);
+                viewIds.remove(i);
+            }
+        }
         if (viewIds == null) {
             SendError.sendError(res, 400, "Failed to create Reports");
             return;
         }
+        System.out.println(viewIdsSize + " Reports Created");
 
-        ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
         // 5. Creating Embed URLs
         System.out.println("Creating Embed URLs for " + viewIds.size() + " Reports");
+        ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
         List<String> embedUrls = EmbedUrls.createEmbedUrls(viewIds, workspaceId);
+        int embedUrlsSize = embedUrls == null ? 0 : embedUrls.size();
+        for (int i = embedUrlsSize - 1; i >= 0; i--) {
+            if (embedUrls.get(i) == null) {
+                configs.remove(i);
+                viewIds.remove(i);
+                embedUrls.remove(i);
+            }
+        }
         if (embedUrls == null || embedUrls.isEmpty()) {
             SendError.sendError(res, 400, "Failed to create Embed URLs");
             return;
         }
+        for (int i = 0; i < embedUrls.size(); i++)
+            configs.get(i).put("embedUrl", embedUrls.get(i));
+        System.out.println(embedUrls.size() + " Urls Created");
 
-        if (embedUrls.size() == configs.size()) {
-            for (int i = 0; i < embedUrls.size(); i++)
-                configs.get(i).put("embedUrl", embedUrls.get(i));
-            for(int i = 0; i < embedUrls.size(); i++){
-                if(embedUrls.get(i) == null) {
-                    configs.remove(i);
-                    embedUrls.remove(i);
-                }
-            }
-        }
-
-        System.out.println(embedUrls.size() + " Reports Created");
-
-        ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
         // 6. Success Response
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("message", "Analysis completed");
-        result.put("key", Utils.encodeLinks(viewIds, workspaceId));
-        result.put("urls", embedUrls);
-        if(embedUrls.size() == configs.size())
-            result.put("configs", configs);
-
+        ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
         res.setStatus(200);
-        res.getWriter().write(gson.toJson(result));
+        res.getWriter().write(gson.toJson(Map.of(
+                "success", true,
+                "status", 200,
+                "data", Map.of(
+                        "message", "Analysis completed",
+                        "key", Utils.encodeLinks(viewIds, workspaceId),
+                        "reportHeading", reportHeading,
+                        "urls", embedUrls,
+                        "configs", configs
+                )
+        )));
     }
 }

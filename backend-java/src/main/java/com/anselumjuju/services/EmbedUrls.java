@@ -29,7 +29,6 @@ public class EmbedUrls {
 
             List<String> embedUrls = new ArrayList<>();
             for (CompletableFuture<String> future : futures)
-                if (future.join() != null)
                     embedUrls.add(future.join());
 
             return embedUrls;
