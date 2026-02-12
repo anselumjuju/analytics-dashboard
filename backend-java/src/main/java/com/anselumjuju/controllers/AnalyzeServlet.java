@@ -4,6 +4,7 @@ import com.anselumjuju.lib.Utils;
 import com.anselumjuju.services.*;
 import com.anselumjuju.services.ai.GetConfig;
 import com.anselumjuju.lib.SendError;
+import com.anselumjuju.services.ai.GetInsight;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -71,7 +72,7 @@ public class AnalyzeServlet extends HttpServlet {
 
         // 4. Creating Reports
         System.out.println("Creating Reports");
-        ProgressSocket.send(jobId, 65, "Designing your dashboard");
+        ProgressSocket.send(jobId, 55, "Designing your dashboard");
         List<String> viewIds = Reports.createReports(configs, workspaceId);
         int viewIdsSize = viewIds == null ? 0 : viewIds.size();
         for (int i = viewIdsSize - 1; i >= 0; i--) {
@@ -80,15 +81,15 @@ public class AnalyzeServlet extends HttpServlet {
                 viewIds.remove(i);
             }
         }
-        if (viewIds == null) {
+        if (viewIds == null || viewIds.isEmpty()) {
             SendError.sendError(res, 400, "Failed to create Reports");
             return;
         }
-        System.out.println(viewIdsSize + " Reports Created");
+        System.out.println(viewIds.size() + " Reports Created");
 
         // 5. Creating Embed URLs
         System.out.println("Creating Embed URLs for " + viewIds.size() + " Reports");
-        ProgressSocket.send(jobId, 80, "Finalizing your dashboard");
+        ProgressSocket.send(jobId, 75, "Finalizing your dashboard");
         List<String> embedUrls = EmbedUrls.createEmbedUrls(viewIds, workspaceId);
         int embedUrlsSize = embedUrls == null ? 0 : embedUrls.size();
         for (int i = embedUrlsSize - 1; i >= 0; i--) {
@@ -106,8 +107,20 @@ public class AnalyzeServlet extends HttpServlet {
             configs.get(i).put("embedUrl", embedUrls.get(i));
         System.out.println(embedUrls.size() + " Urls Created");
 
-        // 6. Success Response
+        // 6. Creating insights
+        System.out.println("Creating insights for reports");
+        ProgressSocket.send(jobId, 85, "Getting insights...");
+        List<String> insights = Insights.createInsights(viewIds, workspaceId);
+        System.out.println("insights: " + (insights == null ? 0 : insights.size()));
+
+        // 7. Generating overall insights
+        System.out.println("Generating overall insight");
+        Map<String, Object> tableSchema = (Map<String, Object>) uploadResponse.get("tableSchema");
+        String reportInsight = GetInsight.getInsight(tableSchema, insights);
+
+        // 8. Success Response
         ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
+        System.out.println("Analysis completed");
         res.setStatus(200);
         res.getWriter().write(gson.toJson(Map.of(
                 "success", true,
@@ -117,7 +130,11 @@ public class AnalyzeServlet extends HttpServlet {
                         "key", Utils.encodeLinks(viewIds, workspaceId),
                         "reportHeading", reportHeading,
                         "urls", embedUrls,
-                        "configs", configs
+                        "configs", configs,
+                        "insights", Map.of(
+                                "reportInsights", insights,
+                                "reportInsight", reportInsight
+                        )
                 )
         )));
     }

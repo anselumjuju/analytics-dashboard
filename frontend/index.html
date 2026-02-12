@@ -79,10 +79,11 @@
 
         <div class="container dashboard-container">
           <div class="dashboard-controls">
-            <h4>Data Insights</h4>
+            <h4 id="dashboard-title">Data Insights</h4>
             <div class="action-buttons" id="dashboard-controls">
               <button id="reset-btn" class="button btn-outline">Reset</button>
-              <button id="share-btn" class="button btn-black">Share</button>
+              <button id="share-btn" class="button btn-black hidden">Share</button>
+              <button id="report-insight-btn" class="button btn-black">Insights</button>
             </div>
           </div>
           <div id="iframe-container" class="iframe-container"></div>
@@ -101,8 +102,21 @@
 
         <button id="retry-btn" class="button btn-retry">Try Again</button>
       </div>
+
+      <!-- Insights Modal -->
+      <div id="insights-modal" class="insights-modal hidden">
+        <button id="insights-close-modal" class="close-modal">X</button>
+        <div class="insights-content" id="insights-content">
+          <h4>Insights</h4>
+          <div class="divider"></div>
+          <div class="insight-text-container">
+            <p>No insights available.</p>
+          </div>
+        </div>
+      </div>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.esm.js"></script>
     <script type="module" src="script.js"></script>
   </body>
 </html>

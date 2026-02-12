@@ -2,12 +2,15 @@ const BASE_URL = 'http://localhost:5500/frontend/index.html';
 const SERVER_URL = 'http://localhost:8080/dashboard-generator-1.1';
 const WS_URL = 'ws://localhost:8080/dashboard-generator-1.1';
 
+import {marked} from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+
 class DashboardGenerator {
   constructor() {
     this.state = {
       selectedFile: null,
       isProcessing: false,
       shareLink: null,
+      reportInsight: null,
     };
 
     this.init();
@@ -32,6 +35,7 @@ class DashboardGenerator {
     this.progressView = this.uploadView.nextElementSibling;
     this.dashboardView = this.progressView.nextElementSibling;
     this.errorView = this.dashboardView.nextElementSibling;
+    this.insightModal = this.errorView.nextElementSibling;
 
     // iFrame
     this.dashboardContainer = this.dashboardView.lastElementChild;
@@ -44,12 +48,22 @@ class DashboardGenerator {
     this.resetButton = this.buttons['reset-btn'];
     this.shareButton = this.buttons['share-btn'];
     this.retryButton = this.buttons['retry-btn'];
+    this.insightCloseButton = this.buttons['insights-close-modal'];
+    this.reportInsightButton = this.buttons['report-insight-btn'];
 
     // Progress
     this.progressContainer = this.progressView.lastElementChild;
     this.progressBarBg = this.progressContainer.firstElementChild;
     this.progressBar = this.progressBarBg.firstElementChild;
     this.progressStatus = this.progressBarBg.nextElementSibling;
+
+    // Dashboard
+    this.dashboardTitle = this.dashboardView.getElementsByTagName('h4')[0];
+
+    // Insights
+    this.insightContainer = this.insightModal.children[1];
+    this.insightHeading = this.insightContainer.firstElementChild;
+    this.insightTextContainer = this.insightContainer.lastElementChild;
 
     // File Upload
     this.uploadContainer = this.uploadView.children[1];
@@ -90,6 +104,8 @@ class DashboardGenerator {
       this.generateDashboard();
     });
     this.shareButton.addEventListener('click', () => this.shareDashboard());
+    this.insightCloseButton.addEventListener('click', () => this.closeInsights());
+    this.reportInsightButton.addEventListener('click', () => this.openReportInsight());
   }
 
   // Utilities
@@ -108,6 +124,12 @@ class DashboardGenerator {
     };
     Object.values(views).forEach((view) => view.classList.add('hidden'));
     views[viewName].classList.remove('hidden');
+  }
+
+  closeInsights() {
+    this.insightHeading.innerText = 'Insights';
+    this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
+    this.insightModal.classList.add('hidden');
   }
 
   // Handling Files
@@ -169,9 +191,14 @@ class DashboardGenerator {
     this.switchView('progress');
     try {
       const socket = this.connectToWS(this.progressBar, this.progressStatus, uniqueKey);
-      const data = await this.analyzeFile(this.state.selectedFile, uniqueKey);
-      if (data.success == true) {
-        this.displayReportsJsApi(data.urls, data.configs);
+      const response = await this.analyzeFile(this.state.selectedFile, uniqueKey);
+      console.log(response);
+      if (response.success == true) {
+        const data = response.data;
+        this.dashboardTitle.innerText = data.reportHeading;
+        this.insightsData = data.insights;
+        this.state.reportInsight = this.insightsData.reportInsight;
+        this.displayReportsJsApi(data.urls, data.configs, this.insightsData.reportInsights);
         this.state.shareLink = BASE_URL + '?key=' + data.key;
         socket.close();
       } else {
@@ -198,7 +225,20 @@ class DashboardGenerator {
     }
   }
 
-  displayReportsJsApi(urls, configs) {
+  openReportInsight() {
+    if (this.state.reportInsight != null) {
+      this.insightHeading.innerText = 'Report Insight';
+      this.insightTextContainer.innerHTML = marked.parse(
+        this.state.reportInsight.replaceAll('%%', '%').replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>'),
+      );
+    } else {
+      this.insightHeading.innerText = 'Insights';
+      this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
+    }
+    this.insightModal.classList.remove('hidden');
+  }
+
+  displayReportsJsApi(urls, configs, insights) {
     const reactFragment = document.createDocumentFragment();
 
     if (configs == null) {
@@ -206,7 +246,7 @@ class DashboardGenerator {
       urls.forEach((u) => configs.push({embedUrl: u}));
     }
 
-    configs.forEach((config) => {
+    configs.forEach((config, i) => {
       const url = config.embedUrl;
       const outerDiv = document.createElement('div');
       outerDiv.className = 'report-card';
@@ -242,20 +282,30 @@ class DashboardGenerator {
       const insightsButton = document.createElement('button');
       insightsButton.innerText = 'Insights';
       insightsButton.addEventListener('click', () => {
-        report.showInsights();
+        if (insights != null && i < insights.length) {
+          this.insightHeading.innerText = config.title;
+          const insightContent = insights[i]
+            .replaceAll(/%%/g, '%')
+            .replaceAll(/\n\n(.*?)\n\n/g, '\n\n<span class="bold">$1</span>\n\n')
+            .replaceAll(/\n/g, '<br />')
+            .replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>');
+          this.insightTextContainer.innerHTML = '<p>' + insightContent + '</p>';
+        } else {
+          this.insightHeading.innerText = 'Insights';
+          this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
+        }
+        this.insightModal.classList.remove('hidden');
       });
 
       const vudButton = document.createElement('button');
       vudButton.innerText = 'VUD';
       vudButton.addEventListener('click', () => {
-        console.log('showing VUD');
         report.showVUD();
       });
 
       const exportButton = document.createElement('button');
       exportButton.innerText = 'Export';
       exportButton.addEventListener('click', () => {
-        console.log('exporting PDF');
         report.exportAsPDF();
       });
 
@@ -273,11 +323,11 @@ class DashboardGenerator {
           sortAxis.xAxis.forEach((axis, i) => {
             // Ascending
             const optionElAsc = document.createElement('option');
-            optionElAsc.value = 'xaxis-' + 'asc' + '-' + ++i;
+            optionElAsc.value = 'xaxis-asc-' + ++i;
             optionElAsc.innerText = axis.columnName + ' - Asc';
             // Descending
             const optionElDesc = document.createElement('option');
-            optionElDesc.value = 'xaxis-' + 'desc' + '-' + ++i;
+            optionElDesc.value = 'xaxis-desc-' + i;
             optionElDesc.innerText = axis.columnName + ' - Desc';
             optGroupXAxis.appendChild(optionElAsc);
             optGroupXAxis.appendChild(optionElDesc);
@@ -295,7 +345,7 @@ class DashboardGenerator {
             optionElAsc.innerText = axis.columnName + ' - Asc';
             // Descending
             const optionElDesc = document.createElement('option');
-            optionElDesc.value = 'yaxis-desc-' + ++i;
+            optionElDesc.value = 'yaxis-desc-' + i;
             optionElDesc.innerText = axis.columnName + ' - Desc';
             optGroupYAxis.appendChild(optionElAsc);
             optGroupYAxis.appendChild(optionElDesc);
@@ -306,10 +356,10 @@ class DashboardGenerator {
         sortSelector.title = 'Sort By';
         sortSelector.addEventListener('change', (e) => {
           const selectedValue = e.target.value;
-          const axis = selectedValue.includes('xaxis') ? 'xaxis' : 'yaxis';
+          const axis = selectedValue.includes('xaxis') ? 'XAXIS' : 'YAXIS';
           const order = selectedValue.includes('asc') ? 'asc' : 'desc';
-          const index = selectedValue.split('-')[2];
-          report.sortView(axis.toUpperCase(), order, index);
+          const index = Number(selectedValue.split('-')[2]);
+          report.sortView(axis, order, index);
         });
       }
 
@@ -333,7 +383,7 @@ class DashboardGenerator {
     this.updateButtons();
 
     if (urls.length > 0 && urls.length % 2 != 0) {
-      const comp = this.analyzeContainer.getElementsByClassName('dashboard-card')[0];
+      const comp = this.analyzeContainer.getElementsByClassName('report-card')[0];
       comp.style.gridColumn = 'span 2';
     }
 
