@@ -131,7 +131,7 @@ public class GetConfig {
                         - Add filters ONLY when they improve decision-making
                         - Prefer userFilters for interactive exploration
                         - Avoid userFilters on Date-type columns
-                        - Use multiple userFilters when it improves usability
+                        - Use multiple userFilters atleast one for each config
                         
                         OUTPUT REQUIREMENTS (ABSOLUTE):
                         - Use key name: reportHeading (NOT title)
