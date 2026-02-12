@@ -83,12 +83,9 @@ public class GeminiInsights extends HttpServlet {
 
             String insight = (String) responseBody.get("insight");
 
-            if (inputFile.exists()) {
-                boolean isFileDeleted = inputFile.delete();
-                System.out.println("File deleted: " + isFileDeleted);
-            }
+            if (inputFile.exists()) inputFile.delete();
 
-            System.out.println("Gemini insights generated successfully");
+
             res.setStatus(200);
             res.getWriter().write(new Gson().toJson(Map.of(
                     "success", true,

@@ -246,10 +246,6 @@ public class ValidateConfigs {
                     config.put("userFilters", userFilters);
                 }
             }
-            if (userFiltersRemoved > 0)
-                System.out.println("Removed " + userFiltersRemoved + " userFilters for invalid operations");
-
-
         } catch (Exception e) {
             System.out.println("Error validating configs: " + e.getMessage());
             return null;

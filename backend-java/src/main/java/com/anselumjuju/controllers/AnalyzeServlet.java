@@ -27,7 +27,6 @@ public class AnalyzeServlet extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-        System.out.println("\n\n\n\n\nAnalyzing...");
 
         String jobId = req.getParameter("jobId");
         if (jobId == null || jobId.isBlank()) {
@@ -42,7 +41,6 @@ public class AnalyzeServlet extends HttpServlet {
         }
 
         // 1. Creating Workspace
-        System.out.println("Creating workspace");
         ProgressSocket.send(jobId, 10, "Getting things ready...");
         String workspaceId = Workspaces.createWorkspace();
         if (workspaceId == null) {
@@ -51,7 +49,6 @@ public class AnalyzeServlet extends HttpServlet {
         }
 
         // 2. Uploading File to Workspace
-        System.out.println("Uploading file to workspace");
         Map<String, Object> uploadResponse = DataUpload.uploadFile(filePart, workspaceId);
         if (uploadResponse == null) {
             SendError.sendError(res, 400, "Failed to upload file");
@@ -59,7 +56,6 @@ public class AnalyzeServlet extends HttpServlet {
         }
 
         // 3. Generate Configs from Gemini
-        System.out.println("Generating configs from Gemini");
         ProgressSocket.send(jobId, 20, "Analyzing your report...");
         Map<String, Object> geminiResponse = GetConfig.getConfig(uploadResponse, jobId);
         String reportHeading = (String) geminiResponse.get("reportHeading");
@@ -68,10 +64,8 @@ public class AnalyzeServlet extends HttpServlet {
             SendError.sendError(res, 400, "Failed to load configs");
             return;
         }
-        System.out.println(configs.size() + " Configs Generated");
 
         // 4. Creating Reports
-        System.out.println("Creating Reports");
         ProgressSocket.send(jobId, 55, "Designing your dashboard");
         List<String> viewIds = Reports.createReports(configs, workspaceId);
         int viewIdsSize = viewIds == null ? 0 : viewIds.size();
@@ -85,10 +79,8 @@ public class AnalyzeServlet extends HttpServlet {
             SendError.sendError(res, 400, "Failed to create Reports");
             return;
         }
-        System.out.println(viewIds.size() + " Reports Created");
 
         // 5. Creating Embed URLs
-        System.out.println("Creating Embed URLs for " + viewIds.size() + " Reports");
         ProgressSocket.send(jobId, 75, "Finalizing your dashboard");
         List<String> embedUrls = EmbedUrls.createEmbedUrls(viewIds, workspaceId);
         int embedUrlsSize = embedUrls == null ? 0 : embedUrls.size();
@@ -105,22 +97,17 @@ public class AnalyzeServlet extends HttpServlet {
         }
         for (int i = 0; i < embedUrls.size(); i++)
             configs.get(i).put("embedUrl", embedUrls.get(i));
-        System.out.println(embedUrls.size() + " Urls Created");
 
         // 6. Creating insights
-        System.out.println("Creating insights for reports");
-        ProgressSocket.send(jobId, 85, "Getting insights...");
+        ProgressSocket.send(jobId, 80, "Getting insights...");
         List<String> insights = Insights.createInsights(viewIds, workspaceId);
-        System.out.println("insights: " + (insights == null ? 0 : insights.size()));
 
         // 7. Generating overall insights
-        System.out.println("Generating overall insight");
         Map<String, Object> tableSchema = (Map<String, Object>) uploadResponse.get("tableSchema");
         String reportInsight = GetInsight.getInsight(tableSchema, insights);
 
         // 8. Success Response
-        ProgressSocket.send(jobId, 95, "Your dashboard is ready!");
-        System.out.println("Analysis completed");
+        ProgressSocket.send(jobId, 93, "Your dashboard is ready!");
         res.setStatus(200);
         res.getWriter().write(gson.toJson(Map.of(
                 "success", true,

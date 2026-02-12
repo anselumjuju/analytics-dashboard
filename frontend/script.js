@@ -11,6 +11,7 @@ class DashboardGenerator {
       isProcessing: false,
       shareLink: null,
       reportInsight: null,
+      geminiInsight: null,
     };
 
     this.init();
@@ -50,6 +51,7 @@ class DashboardGenerator {
     this.retryButton = this.buttons['retry-btn'];
     this.insightCloseButton = this.buttons['insights-close-modal'];
     this.reportInsightButton = this.buttons['report-insight-btn'];
+    this.geminiInsightButton = this.buttons['gemini-insight-btn'];
 
     // Progress
     this.progressContainer = this.progressView.lastElementChild;
@@ -106,6 +108,7 @@ class DashboardGenerator {
     this.shareButton.addEventListener('click', () => this.shareDashboard());
     this.insightCloseButton.addEventListener('click', () => this.closeInsights());
     this.reportInsightButton.addEventListener('click', () => this.openReportInsight());
+    this.geminiInsightButton.addEventListener('click', () => this.openGeminiInsight());
   }
 
   // Utilities
@@ -191,10 +194,21 @@ class DashboardGenerator {
     this.switchView('progress');
     try {
       const socket = this.connectToWS(this.progressBar, this.progressStatus, uniqueKey);
-      const response = await this.analyzeFile(this.state.selectedFile, uniqueKey);
-      console.log(response);
-      if (response.success == true) {
-        const data = response.data;
+      const [analyticsPromise, insightsPromise] = await Promise.allSettled([
+        this.analyzeFile(this.state.selectedFile, uniqueKey).catch(() => {
+          socket.close();
+          this.switchView('error');
+        }),
+        this.fetchGeminiInsight(this.state.selectedFile),
+      ]);
+
+      if (analyticsPromise.status == 'fulfilled') {
+        const analyticsResponse = analyticsPromise.value;
+        if (insightsPromise.status == 'fulfilled') {
+          const insightsResponse = insightsPromise.value;
+          this.state.geminiInsight = insightsResponse.data.insight;
+        }
+        const data = analyticsResponse.data;
         this.dashboardTitle.innerText = data.reportHeading;
         this.insightsData = data.insights;
         this.state.reportInsight = this.insightsData.reportInsight;
@@ -230,6 +244,19 @@ class DashboardGenerator {
       this.insightHeading.innerText = 'Report Insight';
       this.insightTextContainer.innerHTML = marked.parse(
         this.state.reportInsight.replaceAll('%%', '%').replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>'),
+      );
+    } else {
+      this.insightHeading.innerText = 'Insights';
+      this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
+    }
+    this.insightModal.classList.remove('hidden');
+  }
+
+  openGeminiInsight() {
+    if (this.state.geminiInsight != null) {
+      this.insightHeading.innerText = 'Gemini Insight';
+      this.insightTextContainer.innerHTML = marked.parse(
+        this.state.geminiInsight.replaceAll('%%', '%').replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>'),
       );
     } else {
       this.insightHeading.innerText = 'Insights';
@@ -426,6 +453,21 @@ class DashboardGenerator {
     formData.append('file', file);
 
     const response = await fetch(`${SERVER_URL}/api/analyze?jobId=${key}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error('Upload failed');
+
+    const data = await response.json();
+    return data;
+  }
+
+  async fetchGeminiInsight(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${SERVER_URL}/api/insights/gemini`, {
       method: 'POST',
       body: formData,
     });
