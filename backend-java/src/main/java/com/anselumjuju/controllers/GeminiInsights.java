@@ -85,7 +85,6 @@ public class GeminiInsights extends HttpServlet {
 
             if (inputFile.exists()) inputFile.delete();
 
-
             res.setStatus(200);
             res.getWriter().write(new Gson().toJson(Map.of(
                     "success", true,
@@ -103,49 +102,104 @@ public class GeminiInsights extends HttpServlet {
 
     private static String getPrompt() {
         return """
-                CONTEXT:
-                The attached file is the sole source of truth. Analyze the entire dataset before producing output.
-                
-                OBJECTIVE:
-                Generate a structured, executive-level analytical insight report derived strictly from the data.
-                
-                ANALYSIS REQUIREMENTS:
-                - Infer the dataset domain from structure and column relationships
-                - Identify measurable performance metrics present in the data
-                - Compute valid derived metrics where mathematically supported (totals, averages, growth rates, ratios, distributions, volatility indicators)
-                - Highlight performance strengths, weaknesses, trends, concentration risks, and anomalies
-                - Base all conclusions exclusively on values contained in the file
-                - Do not fabricate missing data or assume unstated fields
-                
-                REPORT GUIDELINES:
-                - Preserve all metric names and numerical values exactly
-                - Emphasize material contrasts and impact drivers
-                - Prioritize strategic relevance over descriptive summaries
-                
-                OUTPUT FORMAT (STRICT):
-                {
-                  "insight": "Markdown-formatted string"
-                }
-                
-                MARKDOWN REQUIREMENTS (inside "insight"):
-                - 350–450 words
-                - Use only ## and ### headings
-                - Use bullet points where appropriate
-                - Bold key metrics using ** **
-                - Maintain executive clarity and structured spacing
-                
-                REQUIRED SECTIONS:
-                - Executive Overview
-                - Key Metrics & Performance Highlights
-                - Risk & Pattern Analysis
-                - Strategic Implications
-                
-                STRICT RULES:
-                - Return strictly valid JSON
-                - Only one key: "insight"
-                - No additional keys
-                - No commentary outside JSON
-                """;
+            CONTEXT:
+            The attached file is the sole and authoritative source of truth.
+            You must fully analyze the entire dataset before generating output.
+
+            OBJECTIVE:
+            Produce a structured, executive-level analytical report that:
+            - Identifies the dataset domain automatically
+            - Extracts and computes domain-relevant key metrics
+            - Prioritizes the most important performance indicators
+            - Clearly separates high-impact KPIs from supporting analysis
+
+            DOMAIN DETECTION:
+            First infer the dataset type based on column names, structure, and value patterns.
+            Examples:
+            - Sales/Business Data → revenue, profit, margin, growth, regional performance
+            - Finance Data → cash flow, expenses, ratios, variance
+            - Cricket/Sports Data → run rate, strike rate, averages, totals, wickets
+            - Inventory → turnover, stock levels, shortages
+            - User/Analytics → engagement rate, retention, conversion
+            Adapt metrics accordingly.
+
+            ANALYSIS REQUIREMENTS:
+            - Identify all measurable metrics directly present in the dataset
+            - Compute derived metrics ONLY when mathematically supported
+            - Show totals, averages, growth rates, ratios, concentration percentages, and variability where valid
+            - Verify every calculation against raw data before including it
+            - Do NOT invent missing columns or fabricate values
+            - Do NOT assume industry benchmarks or external standards
+            - Preserve metric names and numeric values exactly as derived
+
+            PRIORITY LOGIC:
+            - Highlight 3–6 PRIMARY KPIs most relevant to the inferred domain
+            - Present them clearly and separately before deeper analysis
+            - Rank insights by business or performance impact
+            - Emphasize material differences, imbalances, or dominant contributors
+
+            REPORT STRUCTURE (STRICT INSIDE MARKDOWN):
+            
+            ## Executive Overview
+            High-level summary of dataset type and dominant signals.
+
+            ## Primary Key Metrics
+            Clearly separated, high-priority KPIs:
+            - Metric Name: **Value**
+            - Metric Name: **Value**
+            Include brief one-line interpretation per metric.
+            
+            ## Quick Insights
+            Generate 5–8 key questions a user would naturally ask after uploading this dataset.
+            Immediately answer each question using precise data-derived values.
+            Present in bullet format:
+            - **Subheading for the question** Answer with computed metric and brief interpretation.
+            - **Subheading for the question** Answer with computed metric and brief interpretation.
+            Questions must adapt to dataset type.
+            Instead of writing the complete question, write the subheading of the question.
+            Examples:
+            - What is total sales and total profit? [Total Sales & Profit]
+            - Which product contributes the most revenue? [Product with most revenue]
+            - What is the overall run rate? [Overall run rate]
+            - Who has the highest strike rate? [Highest strike rate]
+            - Which segment drives the largest share? [Segment with largest share]
+
+            ## Performance Highlights
+            - Strength indicators
+            - Growth or decline signals
+            - Segment or category performance comparisons
+
+            ## Risk & Pattern Analysis
+            - Concentration risk
+            - Volatility
+            - Structural imbalance
+            - Outliers or anomalies
+            - Use Bullet Points for better readability
+
+            ## Strategic Implications
+            Decision-level interpretation derived strictly from the data.
+            Use Bullet Points for better readability
+
+            OUTPUT FORMAT (STRICT):
+            {
+              "insight": "Markdown-formatted string"
+            }
+
+            MARKDOWN REQUIREMENTS:
+            - 350–450 words
+            - Use only ## and ### headings (no H1)
+            - Use bullet points where appropriate
+            - Bold all key numeric metrics using ** **
+            - Maintain clean spacing and executive clarity
+
+            STRICT RULES:
+            - Return strictly valid JSON
+            - Only one key: "insight"
+            - No additional keys
+            - No commentary outside JSON
+            - All metrics must be mathematically correct and traceable to file data
+            - If a metric cannot be confidently computed, do not include it
+            """;
     }
 
     private static String getSystemInstruction() {

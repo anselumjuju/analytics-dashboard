@@ -61,11 +61,11 @@ public class GetInsight {
 
     private static String getInput(Map<String, Object> tableSchema, List<String> insights) {
         return """
-                    INPUT DATA:
-                    TABLE SCHEMA (SOURCE OF TRUTH):
-                    ""\" + tableSchema.toString() + ""\"               \s
-                    INSIGHTS (use these insights to create summary):
-                    ""\" + insights.toString() + ""\"               \s
+                INPUT DATA:
+                TABLE SCHEMA (SOURCE OF TRUTH):
+                """ + tableSchema.toString() + """
+                INSIGHTS (use these insights to create summary):
+                """ + insights.toString() + """
                     OUTPUT SCHEMA (output should strictly follow this schema):
                     {
                         "insight" : "[Overall insight as Markdown String][450–500 words]"
@@ -75,37 +75,90 @@ public class GetInsight {
 
     private static String getRules() {
         return """
-                    RULES (NON-NEGOTIABLE):
-                    DATA USAGE:
-                    - Use ONLY the provided insights as the analytical source
-                    - Do NOT introduce new metrics, calculations, assumptions, projections, or interpretations beyond what is explicitly stated
-                    - Preserve all metric names, numerical values, percentages, time periods, and directional trends exactly as written
-                    - If a value appears, it must remain unchanged
-                    ANALYTICAL EXPECTATIONS:
-                    - Infer the dataset domain using the TABLE SCHEMA
-                    - Understand the logical flow and sequencing of the provided insights
-                    - Identify key patterns, concentration effects, volatility, growth signals, risk indicators, and performance drivers
-                    - Consolidate all findings into ONE cohesive executive-level narrative
-                    - Focus on business implications rather than repeating individual statements
-                    - Avoid copying insight sentences verbatim; synthesize instead
-                    STRUCTURE REQUIREMENTS:
-                    - Output must be 200–300 words
-                    - Maintain executive tone and analytical clarity
-                    - Format the insight using clean Markdown suitable for rendering with markdown-it
-                    - Make the output more readable and clean for users
-                    - You MAY use:
-                      - Headings (##, ###)
-                      - Bullet lists or numbered lists
-                      - **Bold text** for emphasis
-                      - Paragraph spacing for structure
-                      - Also add line breaks, and use lists.
-                      - Don't use h1 tags
-                    JSON ENFORCEMENT:
-                    - Output MUST be strictly valid JSON
-                    - The JSON object must contain ONLY one key: "insight"
-                    - The value must be a single Markdown-formatted string
-                    - Do NOT include any additional keys
-                    - Do NOT include any text outside the JSON object
+                    CONTEXT:
+                    The attached file is the sole and authoritative source of truth.
+                    You must fully analyze the entire dataset before generating output.
+                    OBJECTIVE:
+                    Produce a structured, executive-level analytical report that:
+                    - Automatically identifies the dataset domain
+                    - Extracts and computes domain-relevant key metrics
+                    - Prioritizes the most important performance indicators
+                    - Clearly separates high-impact KPIs from supporting analysis
+                    - Provides immediate answers to critical user questions about the dataset
+                    DOMAIN DETECTION:
+                    First infer the dataset type based on column names, structure, relationships, and value patterns.
+                    Examples:
+                    - Sales/Business Data → revenue, profit, margin, growth rate, top product, region contribution
+                    - Finance Data → expense breakdown, net position, variance, cash flow trends
+                    - Cricket/Sports Data → total runs, run rate, strike rate, wickets, averages
+                    - Inventory → turnover rate, stock concentration, shortages, top-moving items
+                    - User/Analytics → engagement rate, retention rate, conversion metrics
+                    Adapt metrics dynamically based on detected columns.
+                    COLUMN-DRIVEN ANALYSIS REQUIREMENT:
+                    - Identify measurable numeric columns and relevant categorical fields
+                    - Analyze relationships between fields (e.g., product vs revenue, player vs runs)
+                    - Compute totals, averages, ratios, rankings, concentration %, and growth signals only when mathematically supported
+                    - Validate every calculation against dataset values before including it
+                    - Do NOT fabricate missing columns or values
+                    - Do NOT assume industry standards or external benchmarks
+                    - Preserve all metric names and numeric values exactly as derived
+                    PRIORITY LOGIC:
+                    - Highlight 3–6 PRIMARY KPIs most relevant to the inferred domain
+                    - Present them clearly and separately before deeper analysis
+                    - Rank insights by impact or contribution
+                    - Emphasize material differences and dominant contributors
+                    REPORT STRUCTURE (STRICT INSIDE MARKDOWN):
+                    ## Executive Overview
+                    High-level explanation of dataset type, scope, and dominant performance signals.
+                    ## Primary Key Metrics
+                    Clearly separated high-impact KPIs:
+                    - Metric Name: **Value** — one-line interpretation
+                    - Metric Name: **Value** — one-line interpretation
+                    Prioritize what a user would immediately want to know.
+                    ### Quick Insights
+                    Generate 5–8 key questions a user would naturally ask after uploading this dataset.
+                    Immediately answer each question using precise data-derived values.
+                    Present in bullet format:
+                    - **Subheading for the question** Answer with computed metric and brief interpretation.
+                    - **Subheading for the question** Answer with computed metric and brief interpretation.
+                    Questions must adapt to dataset type.
+                    Instead of writing the complete question, write the subheading of the question.
+                    Examples:
+                    - What is total sales and total profit? [Total Sales & Profit]
+                    - Which product contributes the most revenue? [Product with most revenue]
+                    - What is the overall run rate? [Overall run rate]
+                    - Who has the highest strike rate? [Highest strike rate]
+                    - Which segment drives the largest share? [Segment with largest share]
+                    ## Performance Highlights
+                    - Strength indicators
+                    - Growth or decline patterns
+                    - Category or segment comparisons
+                    ## Risk & Pattern Analysis
+                    - Concentration risks
+                    - Volatility signals
+                    - Structural imbalances
+                    - Outliers or anomalies
+                    - Use Bullet Points for better readability
+                    ## Strategic Implications
+                    Decision-level insights strictly derived from computed data.
+                    Use Bullet Points for better readability
+                    OUTPUT FORMAT (STRICT):
+                    {
+                      "insight": "Markdown-formatted string"
+                    }
+                    MARKDOWN REQUIREMENTS:
+                    - 350–450 words
+                    - Use only ## and ### headings (no H1)
+                    - Use bullet points where appropriate
+                    - Bold all key numeric metrics using ** **\s
+                    - Maintain clean spacing and executive clarity
+                    STRICT RULES:
+                    - Return strictly valid JSON
+                    - Only one key: "insight"
+                    - No additional keys
+                    - No commentary outside JSON
+                    - All metrics must be mathematically correct and traceable to file data
+                    - If a metric cannot be confidently computed, do not include it
                 """;
     }
 

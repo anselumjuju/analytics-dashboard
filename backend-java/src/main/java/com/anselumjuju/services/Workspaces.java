@@ -23,8 +23,9 @@ public class Workspaces {
     static final String accessCode = AccessToken.getAccessToken();
 
     public static String createWorkspace() {
-        String uniqueId = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 10);
-        String workspaceName = "workspace_" + uniqueId;
+        String uniqueId = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 5);
+        String uniqueTimestamp = String.valueOf(System.currentTimeMillis());
+        String workspaceName = "workspace_" + uniqueId + "_" + uniqueTimestamp;
 
         JsonObject params = new JsonObject();
         params.addProperty("workspaceName", workspaceName);
