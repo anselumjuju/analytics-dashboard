@@ -82,7 +82,6 @@
             <h4 id="dashboard-title">Data Insights</h4>
             <div class="action-buttons" id="dashboard-controls">
               <button id="reset-btn" class="button btn-outline">Reset</button>
-              <button id="share-btn" class="button btn-black hidden">Share</button>
               <button id="report-insight-btn" class="button btn-black">Gemini Insights from Zia</button>
               <button id="gemini-insight-btn" class="button btn-black">Gemini Insights from File</button>
             </div>
@@ -106,12 +105,14 @@
 
       <!-- Insights Modal -->
       <div id="insights-modal" class="insights-modal hidden">
-        <button id="insights-close-modal" class="close-modal">X</button>
-        <div class="insights-content" id="insights-content">
-          <h4>Insights</h4>
-          <div class="divider"></div>
-          <div class="insight-text-container">
-            <p>No insights available.</p>
+        <div class="insights-modal-container">
+          <button id="insights-close-modal" class="close-modal">X</button>
+          <div class="insights-content" id="insights-content">
+            <h4>Insights</h4>
+            <div class="divider"></div>
+            <div class="insight-text-container">
+              <p>No insights available.</p>
+            </div>
           </div>
         </div>
       </div>

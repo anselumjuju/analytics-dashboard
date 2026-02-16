@@ -42,12 +42,12 @@ public class Insights {
         }
     }
 
-    private static CompletableFuture<String> createInsight(HttpClient client, String accessCode, String orgId, String baseUrl, String viewId) {
+    private static CompletableFuture<String> createInsight(HttpClient client, String accessCode, String orgId,
+            String baseUrl, String viewId) {
         String params = Utils.encode(new Gson().toJson(Map.of(
                 "responseType", "string",
                 "insightLang", "en",
-                "verbosity", "high"
-        )));
+                "verbosity", "medium")));
         String url = (baseUrl + "?CONFIG=" + params).replace("<view_id>", viewId);
         try {
             HttpRequest req = HttpRequest.newBuilder()
@@ -59,8 +59,9 @@ public class Insights {
 
             return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                     .thenApply(res -> {
-                        Map<String, Object> body = new Gson().fromJson(res.body(), new TypeToken<Map<String, Object>>() {
-                        }.getType());
+                        Map<String, Object> body = new Gson().fromJson(res.body(),
+                                new TypeToken<Map<String, Object>>() {
+                                }.getType());
                         Map<String, Object> data = (Map<String, Object>) body.get("data");
 
                         if (!body.get("status").equals("success")) {

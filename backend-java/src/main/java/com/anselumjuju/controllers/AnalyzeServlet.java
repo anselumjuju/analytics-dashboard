@@ -1,6 +1,5 @@
 package com.anselumjuju.controllers;
 
-import com.anselumjuju.lib.Utils;
 import com.anselumjuju.services.*;
 import com.anselumjuju.services.ai.GetConfig;
 import com.anselumjuju.lib.SendError;
@@ -15,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -121,9 +119,6 @@ public class AnalyzeServlet extends HttpServlet {
                         "configs", configs,
                         "insights", Map.of(
                                 "reportInsights", insights,
-                                "reportInsight", reportInsight
-                        )
-                )
-        )));
+                                "reportInsight", reportInsight)))));
     }
 }
