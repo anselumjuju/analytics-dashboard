@@ -18,6 +18,8 @@
 	/* Box Shadows */
 	--shadow-gray-300: rgba(0, 0, 0, 0.1);
 	--shadow-gray-100: rgba(0, 0, 0, 0.05);
+	/* Background */
+	--black-05: rgba(2, 2, 8, 0.5);
 }
 
 * {
@@ -435,6 +437,19 @@ main {
 
 /* Insights Modal */
 .insights-modal {
+	width: 100%;
+	height: 100svh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	background-color: var(--black-05);
+	backdrop-filter: blur(3px);
+}
+
+.insights-modal-container {
 	width: 95%;
 	max-width: 550px;
 	min-height: 650px;
@@ -442,12 +457,7 @@ main {
 	border-radius: 12px;
 	padding: 30px;
 	color: var(--primary-background);
-	box-shadow: 0 10px 30px var(--shadow-gray-300);
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	z-index: 100;
+	position: relative;
 }
 
 .insights-modal .close-modal {
@@ -508,7 +518,6 @@ main {
 	font-size: 16px;
 	color: var(--primary-background);
 	line-height: 26px;
-	letter-spacing: 10%;
 }
 
 .insight-text-container li::marker {

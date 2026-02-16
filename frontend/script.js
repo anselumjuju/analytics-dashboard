@@ -1,4 +1,3 @@
-const BASE_URL = 'http://localhost:5500/frontend/index.html';
 const SERVER_URL = 'http://localhost:8080/dashboard-generator-1.1';
 const WS_URL = 'ws://localhost:8080/dashboard-generator-1.1';
 
@@ -9,7 +8,6 @@ class DashboardGenerator {
     this.state = {
       selectedFile: null,
       isProcessing: false,
-      shareLink: null,
       reportInsight: null,
       geminiInsight: null,
     };
@@ -23,8 +21,6 @@ class DashboardGenerator {
 
     this.setupEventListeners();
     this.updateButtons();
-    const key = new URLSearchParams(window.location.search).get('key');
-    if (key != null) this.fetchDashboard(key);
   }
 
   // initializeDOM
@@ -47,7 +43,6 @@ class DashboardGenerator {
     this.generateButton = this.buttons['generate-btn'];
     this.removeFileButton = this.buttons['remove-file-btn'];
     this.resetButton = this.buttons['reset-btn'];
-    this.shareButton = this.buttons['share-btn'];
     this.retryButton = this.buttons['retry-btn'];
     this.insightCloseButton = this.buttons['insights-close-modal'];
     this.reportInsightButton = this.buttons['report-insight-btn'];
@@ -63,7 +58,7 @@ class DashboardGenerator {
     this.dashboardTitle = this.dashboardView.getElementsByTagName('h4')[0];
 
     // Insights
-    this.insightContainer = this.insightModal.children[1];
+    this.insightContainer = this.insightModal.children[0].children[1];
     this.insightHeading = this.insightContainer.firstElementChild;
     this.insightTextContainer = this.insightContainer.lastElementChild;
 
@@ -105,9 +100,8 @@ class DashboardGenerator {
       e.preventDefault();
       this.generateDashboard();
     });
-    this.shareButton.addEventListener('click', () => this.shareDashboard());
     this.insightCloseButton.addEventListener('click', () => this.closeInsights());
-    this.reportInsightButton.addEventListener('click', () => this.openReportInsight());
+    this.reportInsightButton.addEventListener('click', () => this.openZiaInsights());
     this.geminiInsightButton.addEventListener('click', () => this.openGeminiInsight());
   }
 
@@ -115,7 +109,6 @@ class DashboardGenerator {
   updateButtons() {
     this.generateButton.disabled = this.state.isProcessing || !this.state.selectedFile;
     this.resetButton.disabled = this.state.isProcessing;
-    this.shareButton.disabled = this.state.isProcessing || !this.state.shareLink;
   }
 
   switchView(viewName) {
@@ -129,10 +122,58 @@ class DashboardGenerator {
     views[viewName].classList.remove('hidden');
   }
 
+  resetUI() {
+    this.state.selectedFile = null;
+    this.state.isProcessing = false;
+
+    this.fileInput.value = '';
+    this.fileNameField.innerText = '';
+    this.fileError.innerText = '';
+
+    this.uploadEmpty.classList.remove('hidden');
+    this.uploadFilled.classList.add('hidden');
+    this.removeFileButton.classList.add('hidden');
+
+    this.progressBar.style.width = '0%';
+    this.progressStatus.innerText = 'Analyzing your Dashboard...';
+
+    this.iFrameContainer.innerHTML = '';
+
+    this.switchView('upload');
+    this.updateButtons();
+  }
+
+  // Insights
   closeInsights() {
     this.insightHeading.innerText = 'Insights';
     this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
     this.insightModal.classList.add('hidden');
+  }
+
+  openZiaInsights() {
+    if (this.state.reportInsight != null) {
+      this.insightHeading.innerText = 'Report Insight';
+      this.insightTextContainer.innerHTML = marked.parse(
+        this.state.reportInsight.replaceAll('%%', '%').replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>'),
+      );
+    } else {
+      this.insightHeading.innerText = 'Insights';
+      this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
+    }
+    this.insightModal.classList.remove('hidden');
+  }
+
+  openGeminiInsight() {
+    if (this.state.geminiInsight != null) {
+      this.insightHeading.innerText = 'Gemini Insight';
+      this.insightTextContainer.innerHTML = marked.parse(
+        this.state.geminiInsight.replaceAll('%%', '%').replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>'),
+      );
+    } else {
+      this.insightHeading.innerText = 'Insights';
+      this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
+    }
+    this.insightModal.classList.remove('hidden');
   }
 
   // Handling Files
@@ -162,29 +203,6 @@ class DashboardGenerator {
   }
 
   // Core Logic
-  resetUI() {
-    this.state.selectedFile = null;
-    this.state.isProcessing = false;
-
-    this.fileInput.value = '';
-    this.fileNameField.innerText = '';
-    this.fileError.innerText = '';
-
-    this.uploadEmpty.classList.remove('hidden');
-    this.uploadFilled.classList.add('hidden');
-    this.removeFileButton.classList.add('hidden');
-
-    this.progressBar.style.width = '0%';
-    this.progressStatus.innerText = 'Analyzing your Dashboard...';
-
-    this.iFrameContainer.innerHTML = '';
-
-    this.state.shareLink = null;
-
-    this.switchView('upload');
-    this.updateButtons();
-  }
-
   async generateDashboard() {
     if (!this.validateFile(this.state.selectedFile)) return;
     const uniqueKey = crypto.randomUUID().replaceAll('-', '');
@@ -210,10 +228,10 @@ class DashboardGenerator {
         }
         const data = analyticsResponse.data;
         this.dashboardTitle.innerText = data.reportHeading;
+        console.log(data.reportDescription);
         this.insightsData = data.insights;
         this.state.reportInsight = this.insightsData.reportInsight;
         this.displayReportsJsApi(data.urls, data.configs, this.insightsData.reportInsights);
-        this.state.shareLink = BASE_URL + '?key=' + data.key;
         socket.close();
       } else {
         socket.close();
@@ -226,43 +244,6 @@ class DashboardGenerator {
       this.state.isProcessing = false;
       this.updateButtons();
     }
-  }
-
-  async shareDashboard() {
-    try {
-      if (!navigator.clipboard) throw new Error('Clipboard API unavailable');
-      await navigator.clipboard.writeText(this.state.shareLink);
-      this.shareButton.innerText = 'Copied';
-      setTimeout(() => (this.shareButton.innerText = 'Share'), 2000);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  openReportInsight() {
-    if (this.state.reportInsight != null) {
-      this.insightHeading.innerText = 'Report Insight';
-      this.insightTextContainer.innerHTML = marked.parse(
-        this.state.reportInsight.replaceAll('%%', '%').replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>'),
-      );
-    } else {
-      this.insightHeading.innerText = 'Insights';
-      this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
-    }
-    this.insightModal.classList.remove('hidden');
-  }
-
-  openGeminiInsight() {
-    if (this.state.geminiInsight != null) {
-      this.insightHeading.innerText = 'Gemini Insight';
-      this.insightTextContainer.innerHTML = marked.parse(
-        this.state.geminiInsight.replaceAll('%%', '%').replaceAll(/\(\d+(\.\d+)?%\)|\d+(\.\d+)?%/g, '<span class="blue">$&</span>'),
-      );
-    } else {
-      this.insightHeading.innerText = 'Insights';
-      this.insightTextContainer.innerHTML = '<p>No insights available.</p>';
-    }
-    this.insightModal.classList.remove('hidden');
   }
 
   displayReportsJsApi(urls, configs, insights) {
@@ -417,36 +398,6 @@ class DashboardGenerator {
     this.switchView('dashboard');
   }
 
-  async fetchDashboard(key) {
-    const uniqueKey = crypto.randomUUID().replaceAll('-', '');
-    this.state.isProcessing = true;
-    this.updateButtons();
-
-    this.switchView('progress');
-    try {
-      const socket = this.connectToWS(this.progressBar, this.progressStatus, uniqueKey);
-      const data = await this.getEmbedUrls(key, uniqueKey);
-      if (data.success == true) {
-        if (data.urls.length == 0) {
-          this.switchView('error');
-          return;
-        }
-        this.displayReportsJsApi(data.urls);
-        this.state.shareLink = BASE_URL + '?key=' + data.key;
-        socket.close();
-      } else {
-        socket.close();
-        this.switchView('error');
-      }
-    } catch (err) {
-      console.error(err);
-      this.switchView('error');
-    } finally {
-      this.state.isProcessing = false;
-      this.updateButtons();
-    }
-  }
-
   // Server Connections
   async analyzeFile(file, key) {
     const formData = new FormData();
@@ -489,15 +440,6 @@ class DashboardGenerator {
 
     return socket;
   }
-
-  async getEmbedUrls(key, jobId) {
-    const response = await fetch(`${SERVER_URL}/api/fetch/embedUrls?key=${key}&jobId=${jobId}`);
-
-    if (!response.ok) throw new Error('Failed to fetch embed URLs');
-
-    const data = await response.json();
-    return data;
-  }
 }
 
-const dashboardGenerator = new DashboardGenerator();
+new DashboardGenerator();
