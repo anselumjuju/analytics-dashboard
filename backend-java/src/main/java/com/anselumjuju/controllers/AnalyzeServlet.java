@@ -59,6 +59,7 @@ public class AnalyzeServlet extends HttpServlet {
         ProgressSocket.send(jobId, 20, "Analyzing your report...");
         Map<String, Object> geminiResponse = GetConfig.getConfig(uploadResponse, jobId);
         String reportHeading = (String) geminiResponse.get("reportHeading");
+        String reportDescription = (String) geminiResponse.get("reportDescription");
         List<Map<String, Object>> configs = (List<Map<String, Object>>) geminiResponse.get("configs");
         if (configs == null) {
             SendError.sendError(res, 400, "Failed to load configs");
@@ -114,8 +115,8 @@ public class AnalyzeServlet extends HttpServlet {
                 "status", 200,
                 "data", Map.of(
                         "message", "Analysis completed",
-                        "key", Utils.encodeLinks(viewIds, workspaceId),
                         "reportHeading", reportHeading,
+                        "reportDescription", reportDescription,
                         "urls", embedUrls,
                         "configs", configs,
                         "insights", Map.of(

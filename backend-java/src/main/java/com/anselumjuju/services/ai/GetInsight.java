@@ -133,6 +133,7 @@ public class GetInsight {
                     - Strength indicators
                     - Growth or decline patterns
                     - Category or segment comparisons
+                    - Use Bullet Points for better readability
                     ## Risk & Pattern Analysis
                     - Concentration risks
                     - Volatility signals

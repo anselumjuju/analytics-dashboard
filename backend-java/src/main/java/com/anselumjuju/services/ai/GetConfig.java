@@ -50,6 +50,7 @@ public class GetConfig {
 
             Map<String, Object> resMap = new HashMap<>();
             resMap.put("reportHeading", responseBody.get("reportHeading"));
+            resMap.put("reportDescription", responseBody.get("reportDescription"));
             resMap.put("configs", validatedConfigs);
 
             return resMap;
@@ -183,7 +184,9 @@ public class GetConfig {
                 
                 OUTPUT REQUIREMENTS (ABSOLUTE):
                     - Use key name: reportHeading (NOT title)
-                    - reportHeading MUST be a concise string of MAXIMUM 5 words
+                    - reportHeading MUST be a concise string of MAXIMUM 4 words
+                    - Use key name: reportDescription (NOT description)
+                    - reportDescription MUST be a concise string of MAXIMUM 15 words
                     - Output ONLY the final JSON configuration object
                     - Match createReportSchema EXACTLY
                     - No invented columns, tables, or metrics
@@ -197,6 +200,7 @@ public class GetConfig {
                 FORMAT REFERENCE (STRUCTURE ONLY — DO NOT COPY VALUES):
                 {
                   reportHeading: "Concise BI Summary",
+                  reportDescription: "This is a concise BI summary",
                   configs: [
                     {
                       "baseTableName": %s,

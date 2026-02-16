@@ -46,7 +46,7 @@ public class Insights {
         String params = Utils.encode(new Gson().toJson(Map.of(
                 "responseType", "string",
                 "insightLang", "en",
-                "verbosity", "medium"
+                "verbosity", "high"
         )));
         String url = (baseUrl + "?CONFIG=" + params).replace("<view_id>", viewId);
         try {
