@@ -1,48 +1,60 @@
-# Analytics Dashboard Generator
+# AI Dashboard Generator
 
-This is a project for generating an analytics dashboard from a CSV or JSON file.
-The project is written in Node.js and uses Express.js as the web framework.
+Turn any CSV file into interactive dashboards with AI-powered insights.
 
-## How to run the project
+AI Dashboard Generator is a web application that accepts a CSV file, automatically generates analytics dashboards, and produces intelligent report insights using AI.
 
-### Clone the project from GitHub
+## Overview
 
-To clone the project from GitHub, open a terminal and run the following command:
+The system works in the following flow:
+
+1. User uploads a **CSV file**
+2. Backend processes the file and:
+   - Uploads data
+   - Extracts column metadata
+   - Sends column details to Gemini for chart configuration
+   - Generates reports based on AI-generated configs
+   - Fetches embed URLs for reports
+   - Retrieves Insights
+3. Frontend renders interactive dashboards using embed URLs
+
+## Technologies Used
+
+- Frontend: HTML, CSS, & JS
+- Backend: API-based data processing
+- AI Model: Gemini (gemini-2.5-flash-lite)
+- Analytics Engine: Zia Insights
+- Embedded Dashboards via Zoho Analytics
+
+---
+
+## Project Structure (Optional)
 
 ```bash
-https://github.com/anselumjuju/analytics-dashboard.git
+.
+├── frontend/
+├── backend/
+├── images/
+├── .gitignore
+└── README.md
 ```
 
-### Install dependencies
+## Preview
 
-To install the dependencies, open a terminal and run the following command:
+### File Upload Interface
 
-```bash
-cd backend
-pnpm install
-```
+![Upload Screen](./images/upload-screen.png)
 
-### Add the environment variables
+---
 
-Rename the `.env.example` file to `.env` and add the necessary environment variables.
+### Dashboard
 
-### Start the server
+![Dashboard View](./images/dashboard-view.png)
 
-To start the server, navigate into the backend folder and run the following command:
+---
 
-```bash
-cd backend
-pnpm start
-```
+### AI Generated Report Insight
 
-### Access the dashboard
-
-To access the dashboard, open the `index.html` file in a web browser.
-
-## How to use the project
-
-- To use the project, open the `index.html` file in a web browser.
-- Start the server using the instructions above.
-- Upload a CSV or JSON file to generate the dashboard.
+![Report Insight Modal](./images/report-insight.png)
 
 ---
