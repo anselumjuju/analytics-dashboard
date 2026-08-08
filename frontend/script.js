@@ -1,5 +1,5 @@
-const SERVER_URL = 'http://localhost:8080/dashboard-generator-1.1';
-const WS_URL = 'ws://localhost:8080/dashboard-generator-1.1';
+const SERVER_URL = 'http://localhost:8081';
+const WS_URL = 'ws://localhost:8081';
 
 import {marked} from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
 
