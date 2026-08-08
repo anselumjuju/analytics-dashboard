@@ -1,3 +1,4 @@
+const SERVER_URL = 'http://localhost:8081';
 const WS_URL = 'ws://localhost:8081';
 
 import {marked} from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
@@ -175,7 +176,7 @@ class DashboardGenerator {
 
   async checkBackendHealth() {
     try {
-      const response = await fetch('/api/health', {method: 'GET'});
+      const response = await fetch(`${SERVER_URL}/api/health`, {method: 'GET'});
       this.setBackendStatus(response.ok);
     } catch {
       this.setBackendStatus(false);
@@ -200,7 +201,7 @@ class DashboardGenerator {
 
   async deleteAllWorkspaces() {
     try {
-      const response = await fetch('/api/delete-workspaces', {
+      const response = await fetch(`${SERVER_URL}/api/delete-workspaces`, {
         method: 'GET',
       });
 
@@ -476,7 +477,7 @@ class DashboardGenerator {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`/api/analyze?jobId=${key}`, {
+    const response = await fetch(`${SERVER_URL}/api/analyze?jobId=${key}`, {
       method: 'POST',
       body: formData,
     });
@@ -491,7 +492,7 @@ class DashboardGenerator {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch('/api/insights/gemini', {
+    const response = await fetch(`${SERVER_URL}/api/insights/gemini`, {
       method: 'POST',
       body: formData,
     });
