@@ -28,7 +28,7 @@ export async function geminiInsightsRoute(req, res) {
 
 async function generateGeminiInsight(file) {
   const ai = new GoogleGenAI({
-    apiKey: env.GEMINI_API_KEY,
+    apiKey: process.env.GEMINI_API_KEY,
   });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
