@@ -14,7 +14,7 @@ export function createApp() {
   app.use(express.json({limit: '2mb'}));
 
   app.post('/api/analyze', upload.single('file'), analyzeRoute);
-  app.get('/api/deleteWorkspaces', deleteWorkspacesRoute);
+  app.get('/api/delete-workspaces', deleteWorkspacesRoute);
   app.post('/api/insights/gemini', upload.single('file'), geminiInsightsRoute);
 
   app.get('/health', (_req, res) => {

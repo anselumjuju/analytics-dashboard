@@ -10,6 +10,9 @@ class DashboardGenerator {
       isProcessing: false,
       reportInsight: null,
       geminiInsight: null,
+      backendHealthy: false,
+      workspaceDeleteDialogOpen: false,
+      backendStatusPoller: null,
     };
 
     this.init();
@@ -33,6 +36,10 @@ class DashboardGenerator {
     this.dashboardView = this.progressView.nextElementSibling;
     this.errorView = this.dashboardView.nextElementSibling;
     this.insightModal = this.errorView.nextElementSibling;
+    this.backendStatusButton = document.getElementById('backend-status');
+    this.workspaceDeleteDialog = document.getElementById('workspace-delete-dialog');
+    this.workspaceDeleteCancelButton = document.getElementById('workspace-delete-cancel');
+    this.workspaceDeleteConfirmButton = document.getElementById('workspace-delete-confirm');
 
     // iFrame
     this.dashboardContainer = this.dashboardView.lastElementChild;
@@ -103,6 +110,17 @@ class DashboardGenerator {
     this.insightCloseButton.addEventListener('click', () => this.closeInsights());
     this.reportInsightButton.addEventListener('click', () => this.openZiaInsights());
     this.geminiInsightButton.addEventListener('click', () => this.openGeminiInsight());
+    this.backendStatusButton.addEventListener('click', () => this.toggleWorkspaceDeleteDialog());
+    this.workspaceDeleteCancelButton.addEventListener('click', () => this.closeWorkspaceDeleteDialog());
+    this.workspaceDeleteConfirmButton.addEventListener('click', () => this.deleteAllWorkspaces());
+
+    document.addEventListener('keydown', (e) => {
+      if (this.isTypingTarget(e.target)) return;
+      if (e.key.toLowerCase() === 'i') this.toggleWorkspaceDeleteDialog();
+      if (e.key === 'Escape') this.closeWorkspaceDeleteDialog();
+    });
+
+    this.startBackendHealthPolling();
   }
 
   // Utilities
@@ -141,6 +159,62 @@ class DashboardGenerator {
 
     this.switchView('upload');
     this.updateButtons();
+  }
+
+  isTypingTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName ? target.tagName.toLowerCase() : '';
+    return target.isContentEditable || ['input', 'textarea', 'select'].includes(tagName);
+  }
+
+  setBackendStatus(healthy) {
+    this.state.backendHealthy = healthy;
+    this.backendStatusButton.classList.toggle('is-online', healthy);
+    this.backendStatusButton.classList.toggle('is-offline', !healthy);
+    this.backendStatusButton.title = healthy ? 'Backend healthy. Press i to delete workspaces.' : 'Backend offline. Press i to try deleting workspaces when it is back online.';
+  }
+
+  async checkBackendHealth() {
+    try {
+      const response = await fetch(`${SERVER_URL}/health`, {method: 'GET'});
+      this.setBackendStatus(response.ok);
+    } catch {
+      this.setBackendStatus(false);
+    }
+  }
+
+  startBackendHealthPolling() {
+    this.checkBackendHealth();
+    this.state.backendStatusPoller = window.setInterval(() => this.checkBackendHealth(), 10000);
+  }
+
+  toggleWorkspaceDeleteDialog() {
+    if (this.state.workspaceDeleteDialogOpen) return;
+    this.state.workspaceDeleteDialogOpen = true;
+    this.workspaceDeleteDialog.classList.remove('hidden');
+  }
+
+  closeWorkspaceDeleteDialog() {
+    this.state.workspaceDeleteDialogOpen = false;
+    this.workspaceDeleteDialog.classList.add('hidden');
+  }
+
+  async deleteAllWorkspaces() {
+    try {
+      const response = await fetch(`${SERVER_URL}/api/delete-workspaces`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete workspaces');
+
+      const data = await response.json();
+      console.log(data);
+      this.closeWorkspaceDeleteDialog();
+      await this.checkBackendHealth();
+    } catch (error) {
+      console.error(error);
+      window.alert('Unable to delete workspaces right now.');
+    }
   }
 
   // Insights

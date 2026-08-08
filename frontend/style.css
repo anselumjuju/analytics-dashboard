@@ -37,6 +37,97 @@ body {
 	text-align: center;
 }
 
+.backend-status {
+	position: fixed;
+	top: 18px;
+	right: 18px;
+	z-index: 30;
+	width: 36px;
+	height: 36px;
+	border-radius: 999px;
+	border: 1px solid var(--glass-border);
+	background: rgba(255, 255, 255, 0.06);
+	backdrop-filter: blur(14px);
+	color: var(--primary-foreground);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+	transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.backend-status:hover,
+.backend-status:focus-visible {
+	transform: translateY(-1px);
+	border-color: rgba(255, 255, 255, 0.3);
+	background: rgba(255, 255, 255, 0.1);
+}
+
+.backend-status-icon {
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1;
+	position: relative;
+	top: -1px;
+}
+
+.backend-status.is-online {
+	border-color: rgba(16, 185, 129, 0.45);
+	background: rgba(16, 185, 129, 0.12);
+}
+
+.backend-status.is-online .backend-status-dot {
+	background: var(--green-400);
+}
+
+.backend-status.is-offline {
+	border-color: rgba(228, 37, 39, 0.45);
+	background: rgba(228, 37, 39, 0.12);
+}
+
+.workspace-delete-dialog {
+	position: fixed;
+	inset: 0;
+	z-index: 40;
+	background: rgba(2, 2, 8, 0.78);
+	backdrop-filter: blur(8px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.workspace-delete-dialog-panel {
+	width: min(92vw, 460px);
+	border-radius: 20px;
+	padding: 28px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+	border: 1px solid var(--glass-border);
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+	text-align: left;
+}
+
+.workspace-delete-dialog-panel h4 {
+	font-size: 20px;
+	margin-bottom: 12px;
+	font-weight: 600;
+}
+
+.workspace-delete-dialog-panel p {
+	color: var(--gray-200);
+	font-size: 14px;
+	line-height: 1.6;
+	margin-bottom: 22px;
+}
+
+.workspace-delete-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
 button {
 	border: none;
 	outline: none;
