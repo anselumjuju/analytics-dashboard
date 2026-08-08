@@ -10,5 +10,5 @@ const server = http.createServer(app);
 attachWebSocketServer(server);
 
 server.listen(port, () => {
-  console.log(`backend-js listening on http://localhost:${port}`);
+  console.log(`backend listening on http://localhost:${port}`);
 });

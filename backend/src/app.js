@@ -14,10 +14,10 @@ export function createApp() {
   app.use(express.json({limit: '2mb'}));
 
   app.post('/api/analyze', upload.single('file'), analyzeRoute);
-  app.get('/api/deleteWorkspaces', deleteWorkspacesRoute);
+  app.get('/api/delete-workspaces', deleteWorkspacesRoute);
   app.post('/api/insights/gemini', upload.single('file'), geminiInsightsRoute);
 
-  app.get('/health', (_req, res) => {
+  app.get('/api/health', (_req, res) => {
     res.status(200).json({success: true, status: 200, data: {message: 'ok'}});
   });
 
