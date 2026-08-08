@@ -1,124 +1,125 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Analytics Dashboard Generator</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
-      rel="stylesheet" />
-    <script src="https://downloads.zohocdn.com/zanalyticslib/jsapi/v1/zanalytics.min.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics Dashboard Generator</title>
 
-    <link rel="stylesheet" href="style.css" />
-  </head>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
+    rel="stylesheet" />
+  <script src="https://downloads.zohocdn.com/zanalyticslib/jsapi/v1/zanalytics.min.js"></script>
 
-  <body>
-    <div class="background">
-      <img src="/frontend/public/assets/bg-mobile.png" class="bg-mobile-image" alt="" />
-      <img src="/frontend/public/assets/bg-desktop.png" class="bg-desktop-image" alt="" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="background">
+    <img src="/public/assets/bg-mobile.png" class="bg-mobile-image" alt="" />
+    <img src="/public/assets/bg-desktop.png" class="bg-desktop-image" alt="" />
+  </div>
+
+  <main id="analyze-container">
+    <!-- Upload View -->
+    <form id="upload-view" class="view">
+      <div class="heading-container" onclick="console.log('dashbordGenerator: ', dashboardGenerator)">
+        <h1>Turn CSV Files Into <br /><span class="gradient-text">Interactive Dashboards</span></h1>
+        <p>Upload your data and instantly generate insightful analytics dashboards — no setup required</p>
+      </div>
+
+      <div class="container upload-container">
+        <div id="drop-zone" class="upload-input-container" aria-label="upload file">
+          <!-- Before Upload -->
+          <div id="upload-empty" class="upload-empty">
+            <input type="file" accept=".csv" id="file-input" class="sr-only" aria-label="upload file" />
+            <h4><span>Choose File</span> or Drag and Drop</h4>
+            <p>Files are processed securely</p>
+          </div>
+
+          <!-- After Upload -->
+          <div id="upload-filled" class="upload-filled hidden">
+            <p id="uploaded-file-name">file name</p>
+          </div>
+        </div>
+        <!-- Remove File -->
+        <button type="reset" id="remove-file-btn" class="remove-file-button hidden" aria-label="remove file">
+          X
+        </button>
+        <!-- Error -->
+        <p class="error" id="file-upload-error"></p>
+        <p class="upload-info">Supported Formats: CSV <br />Max file size: 20 MB</p>
+      </div>
+
+      <button type="submit" id="generate-btn" class="button btn-red">Generate Dashboard</button>
+    </form>
+
+    <!-- Progress View -->
+    <div id="progress-view" class="view hidden">
+      <div class="heading-container">
+        <h1><span class="gradient-text">Creating</span> your dashboard</h1>
+        <p>This may take a moment. Please keep this tab open while we prepare your analytics.</p>
+      </div>
+
+      <div class="container progress-container">
+        <div class="progress-bar-bg">
+          <div id="progress-bar-fill" class="progress-bar-fill"></div>
+        </div>
+        <p id="progress-status">Analyzing your Report...</p>
+      </div>
     </div>
 
-    <main id="analyze-container">
-      <!-- Upload View -->
-      <form id="upload-view" class="view">
-        <div class="heading-container" onclick="console.log('dashbordGenerator: ', dashboardGenerator)">
-          <h1>Turn CSV Files Into <br /><span class="gradient-text">Interactive Dashboards</span></h1>
-          <p>Upload your data and instantly generate insightful analytics dashboards — no setup required</p>
-        </div>
-
-        <div class="container upload-container">
-          <div id="drop-zone" class="upload-input-container" aria-label="upload file">
-            <!-- Before Upload -->
-            <div id="upload-empty" class="upload-empty">
-              <input type="file" accept=".csv" id="file-input" class="sr-only" aria-label="upload file" />
-              <h4><span>Choose File</span> or Drag and Drop</h4>
-              <p>Files are processed securely</p>
-            </div>
-
-            <!-- After Upload -->
-            <div id="upload-filled" class="upload-filled hidden">
-              <p id="uploaded-file-name">file name</p>
-            </div>
-          </div>
-          <!-- Remove File -->
-          <button type="reset" id="remove-file-btn" class="remove-file-button hidden" aria-label="remove file">
-            X
-          </button>
-          <!-- Error -->
-          <p class="error" id="file-upload-error"></p>
-          <p class="upload-info">Supported Formats: CSV <br />Max file size: 20 MB</p>
-        </div>
-
-        <button type="submit" id="generate-btn" class="button btn-red">Generate Dashboard</button>
-      </form>
-
-      <!-- Progress View -->
-      <div id="progress-view" class="view hidden">
-        <div class="heading-container">
-          <h1><span class="gradient-text">Creating</span> your dashboard</h1>
-          <p>This may take a moment. Please keep this tab open while we prepare your analytics.</p>
-        </div>
-
-        <div class="container progress-container">
-          <div class="progress-bar-bg">
-            <div id="progress-bar-fill" class="progress-bar-fill"></div>
-          </div>
-          <p id="progress-status">Analyzing your Report...</p>
-        </div>
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="view hidden">
+      <div class="heading-container">
+        <h1><span class="gradient-text">Analytics</span> Dashboard</h1>
+        <p>Explore insights, trends and reports generated from your data!</p>
       </div>
 
-      <!-- Dashboard View -->
-      <div id="dashboard-view" class="view hidden">
-        <div class="heading-container">
-          <h1><span class="gradient-text">Analytics</span> Dashboard</h1>
-          <p>Explore insights, trends and reports generated from your data!</p>
-        </div>
-
-        <div class="container dashboard-container">
-          <div class="dashboard-controls">
-            <h4 id="dashboard-title">Data Insights</h4>
-            <div class="action-buttons" id="dashboard-controls">
-              <button id="reset-btn" class="button btn-outline">Reset</button>
-              <button id="report-insight-btn" class="button btn-black">Gemini Insights from Zia</button>
-              <button id="gemini-insight-btn" class="button btn-black">Gemini Insights from File</button>
-            </div>
+      <div class="container dashboard-container">
+        <div class="dashboard-controls">
+          <h4 id="dashboard-title">Data Insights</h4>
+          <div class="action-buttons" id="dashboard-controls">
+            <button id="reset-btn" class="button btn-outline">Reset</button>
+            <button id="report-insight-btn" class="button btn-black">Gemini Insights from Zia</button>
+            <button id="gemini-insight-btn" class="button btn-black">Gemini Insights from File</button>
           </div>
-          <div id="iframe-container" class="iframe-container"></div>
         </div>
+        <div id="iframe-container" class="iframe-container"></div>
+      </div>
+    </div>
+
+    <!-- Error View -->
+    <div id="error-view" class="view hidden">
+      <div class="heading-container">
+        <h1>
+          <span class="gradient-text">Error</span>
+          Occurred
+        </h1>
+        <p>We encountered an issue while processing your data.</p>
       </div>
 
-      <!-- Error View -->
-      <div id="error-view" class="view hidden">
-        <div class="heading-container">
-          <h1>
-            <span class="gradient-text">Error</span>
-            Occurred
-          </h1>
-          <p>We encountered an issue while processing your data.</p>
-        </div>
+      <button id="retry-btn" class="button btn-retry">Try Again</button>
+    </div>
 
-        <button id="retry-btn" class="button btn-retry">Try Again</button>
-      </div>
-
-      <!-- Insights Modal -->
-      <div id="insights-modal" class="insights-modal hidden">
-        <div class="insights-modal-container">
-          <button id="insights-close-modal" class="close-modal">X</button>
-          <div class="insights-content" id="insights-content">
-            <h4>Insights</h4>
-            <div class="divider"></div>
-            <div class="insight-text-container">
-              <p>No insights available.</p>
-            </div>
+    <!-- Insights Modal -->
+    <div id="insights-modal" class="insights-modal hidden">
+      <div class="insights-modal-container">
+        <button id="insights-close-modal" class="close-modal">X</button>
+        <div class="insights-content" id="insights-content">
+          <h4>Insights</h4>
+          <div class="divider"></div>
+          <div class="insight-text-container">
+            <p>No insights available.</p>
           </div>
         </div>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.esm.js"></script>
-    <script type="module" src="script.js"></script>
-  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.esm.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
 </html>
