@@ -9,6 +9,7 @@
     "dev": "node --watch src/server.js"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.879.0",
     "@google/genai": "^2.16.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
